@@ -9,143 +9,158 @@
 <script src="../../src/math.js"></script>
 
 <script>
-  var global_id = 0;
-  var global_current_test = 0;
-  var global_tests = {};
+  var global_suites = [];
+  var table_names = ["fields.js", "math.js"]
   
   function formatNumber(number)
   {
     number = String(number).split('.');
     return number[0].replace(/(?=(?:\d{3})+$)(?!\b)/g, ',') + (number[1] ? '.' + number[1] : '');
   }
-   
-  create_test = function(suite, name, fields, math)
-  {
-    options = {};
-    options.id = global_id++;
-    
-    suite.add("fields_" + options.id, fields, options);
-    suite.add("math_"   + options.id, math,   options);
-    
-    var table = document.getElementById("results");
-    var tr = document.createElement("tr");
-    tr.style.backgroundColor = "#FFF"
-    
-    var td_name = document.createElement("td");
-    var td_fields = document.createElement("td");
-    var td_math = document.createElement("td");
-    var td_delta = document.createElement("td");
-    
-    var button = document.createElement("input");
-    button.type = "button";
-    button.value = name;
-    
-    button.addEventListener("click", function()
-    {
-      suite.push("fields_" + options.id);
-      suite.push("math_" + options.id);
-      suite.run(true, true);
-    });
-    
-    td_name.style.textAlign = "left";
-    
-    td_fields.style.textAlign = "right";
-    td_fields.id = "fields_" + options.id;
-    td_fields.innerHTML = "-";
-    
-    td_math.style.textAlign = "right";
-    td_math.id = "math_" + options.id;
-    td_math.innerHTML = "-";
-    
-    td_delta.id = "delta_" + options.id;
-    td_delta.innerHTML = "-";
-    
-    td_name.appendChild(button);
-    
-    tr.appendChild(td_name);
-    tr.appendChild(td_fields);
-    tr.appendChild(td_math);
-    tr.appendChild(td_delta);
-    
-    table.appendChild(tr);
-  };
   
   cycle = function(event, bench)
   {
-    var id = bench.id;
-    
-    if(!global_tests[id])
-      global_tests[id] = {};
-    global_tests[id][bench.name] = bench.hz;
-    
-    global_current_test++;
-    
-    if((global_current_test % 2) == 0)
-    {
-      var delta = document.getElementById("delta_" + id);
-      
-      var fields_frequency = global_tests[id]["fields_" + id];
-      var math_frequency = global_tests[id]["math_" + id];
-      
-      var frequency_delta = ((100 / fields_frequency) * math_frequency).toFixed(2);
-      
-      if(frequency_delta < 100)
-        delta.style.backgroundColor = "#C55";
-      else
-        delta.style.backgroundColor = "#5C5";
-      
-      delta.innerHTML = frequency_delta;
-    }
-      
-    var result = document.getElementById(bench.name);
-    console.log(String(bench));
+    var result = bench.result_out;
     
     result.innerHTML  = formatNumber(bench.hz.toFixed()) + " ops/sec [ ";
     result.innerHTML += "&plusmn; " + bench.stats.rme.toFixed(2) + "% ";
     result.innerHTML += "@ " + bench.stats.size.toFixed() + " runs ]";
-  };
+  }
   
   complete = function()
   {
-    console.log(global_tests);
-    console.log(this);
-    console.log('Fastest is ' + this.filter('fastest').pluck('name'));
+    var delta = this.delta_out;
+    
+    var fields = this[0];
+    var math = this[1];
+    
+    var frequency_delta = ((100 / fields.hz) *  math.hz).toFixed(2);
+    
+    if(frequency_delta < 100)
+      delta.style.backgroundColor = "#C55";
+    else
+      delta.style.backgroundColor = "#5C5";
+    
+    delta.innerHTML = frequency_delta;
+  }
+  
+  setup_table = function()
+  {
+    var table = document.getElementById("results");
+    
+    for(var suite_id=0; suite_id<global_suites.length; ++suite_id)
+    {
+      var name = global_suites[suite_id].name;
+      var suite = global_suites[suite_id].suite;
+      
+      var tr = document.createElement("tr");
+      tr.style.backgroundColor = "#FFF"
+      
+      // test
+      var td_run = document.createElement("td");
+      td_run.style.textAlign = "left";
+      
+      tr.appendChild(td_run);
+      
+      // tests
+      for(var test_id=0; test_id<table_names.length; ++test_id)
+      {
+        var test = suite[test_id];
+        
+        if(test)
+        {
+          var td_result = document.createElement("td");
+          td_result.style.textAlign = "right";
+          
+          td_result.id = "result_" + suite_id + "_" + test_id;
+          td_result.innerHTML = "-";
+          
+          test.result_out = td_result;
+          
+          tr.appendChild(td_result);
+        }
+      }
+      
+      // delta
+      var td_delta = document.createElement("td");
+      
+      td_delta.id = "delta_" + suite_id;
+      td_delta.innerHTML = "-";
+      
+      suite.delta_out = td_delta;
+      
+      tr.appendChild(td_delta);
+      
+      // button
+      var button = document.createElement("input");
+      button.type = "button";
+      button.value = name;
+
+      button.addEventListener("click", function()
+      {
+        suite.run(true);
+      });
+      
+      td_run.appendChild(button);
+      
+      table.appendChild(tr);
+    }
+    
+    console.log(global_suites);
+  }
+   
+  create_test = function(name, test)
+  {
+    var suite = new Benchmark.Suite;
+    
+    var i = global_suites.length;
+    
+    global_suites[i] = {};
+    global_suites[i].name = name;
+    global_suites[i].suite = suite;
+      
+    suite.on('cycle', cycle);
+    suite.on('complete', complete);
+    
+    for(var i=0; i<test.length; ++i)
+      suite.add(test[i]);
   };
+  
+  function run_all()
+  {
+    for(var i=0; i<global_suites.length; ++i)
+      global_suites[i].suite.run();
+  }
   
   function init()
   {
     var applet = document.createElement("applet");
     applet.code = "nano";
     applet.archive = "benchmark.js/nano.jar";
+    applet.width = 10;
+    applet.height = 10;
     document.body.insertBefore(applet, document.body.firstChild);
-    
-    var temp = new math.mat4x4();
-    var suite = new Benchmark.Suite;
-    
-    suite.on('cycle', cycle);
-    suite.on('complete', complete);
 
     // TESTS
-
-    create_test(suite, "mat4x4 (indentity)",
+    
+    create_test("mat4x4 (indentity)", [
       function() { var temp = new x3dom.fields.SFMatrix4f(); },
       function() { var temp = new math.mat4x4(); }
-    );
+    ]);
     
-    create_test(suite, "mat4x4 (single values)",
+    create_test("mat4x4 (single values)", [
       function() { var temp = new x3dom.fields.SFMatrix4f(1,0,0,0, 0,1,0,0, 0,0,1,0, 0,0,0,1); },
       function() { var temp = new math.mat4x4(1,0,0,0, 0,1,0,0, 0,0,1,0, 0,0,0,1); }
-    );
+    ]);
     
-    create_test(suite, "mat4x4 (array)",
+    create_test("mat4x4 (array)", [
       function() { var temp = new x3dom.fields.SFMatrix4f([1,0,0,0, 0,1,0,0, 0,0,1,0, 0,0,0,1]); },
-      function() { var temp = new math.mat4x4([1,0,0,0, 0,1,0,0, 0,0,1,0, 0,0,0,1]); }
-    );
+      function() { var temp = new math.mat4x4(); }
+    ]);
 
     // TESTS
     
-    // suite.run(true, true);
-    
+    setup_table();
   };
 </script>
 </head>
