@@ -1,161 +1,46 @@
 <!DOCTYPE html>
 <html>
 <head>
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
 <title>Math Benchmark</title>
 
 <script src="benchmark.js/benchmark.js"></script>
+<script src="display.js"></script>
+
 <script src="../../src/Internals.js"></script>
 <script src="../../src/fields.js"></script>
 <script src="../../src/math.js"></script>
+<script src="3rdparty/glMatrix.js"></script>
 
 <script>
-  var global_suites = [];
-  var table_names = ["fields.js", "math.js"]
-  
-  function formatNumber(number)
-  {
-    number = String(number).split('.');
-    return number[0].replace(/(?=(?:\d{3})+$)(?!\b)/g, ',') + (number[1] ? '.' + number[1] : '');
-  }
-  
-  cycle = function(event, bench)
-  {
-    var result = bench.result_out;
-    
-    result.innerHTML  = formatNumber(bench.hz.toFixed()) + " ops/sec [ ";
-    result.innerHTML += "&plusmn; " + bench.stats.rme.toFixed(2) + "% ";
-    result.innerHTML += "@ " + bench.stats.size.toFixed() + " runs ]";
-  }
-  
-  complete = function()
-  {
-    var delta = this.delta_out;
-    
-    var fields = this[0];
-    var math = this[1];
-    
-    var frequency_delta = ((100 / fields.hz) *  math.hz).toFixed(2);
-    
-    if(frequency_delta < 100)
-      delta.style.backgroundColor = "#C55";
-    else
-      delta.style.backgroundColor = "#5C5";
-    
-    delta.innerHTML = frequency_delta;
-  }
-  
-  setup_table = function()
-  {
-    var table = document.getElementById("results");
-    
-    for(var suite_id=0; suite_id<global_suites.length; ++suite_id)
-    {
-      var name = global_suites[suite_id].name;
-      var suite = global_suites[suite_id].suite;
-      
-      var tr = document.createElement("tr");
-      tr.style.backgroundColor = "#FFF"
-      
-      // test
-      var td_run = document.createElement("td");
-      td_run.style.textAlign = "left";
-      
-      tr.appendChild(td_run);
-      
-      // tests
-      for(var test_id=0; test_id<table_names.length; ++test_id)
-      {
-        var test = suite[test_id];
-        
-        if(test)
-        {
-          var td_result = document.createElement("td");
-          td_result.style.textAlign = "right";
-          
-          td_result.id = "result_" + suite_id + "_" + test_id;
-          td_result.innerHTML = "-";
-          
-          test.result_out = td_result;
-          
-          tr.appendChild(td_result);
-        }
-      }
-      
-      // delta
-      var td_delta = document.createElement("td");
-      
-      td_delta.id = "delta_" + suite_id;
-      td_delta.innerHTML = "-";
-      
-      suite.delta_out = td_delta;
-      
-      tr.appendChild(td_delta);
-      
-      // button
-      var button = document.createElement("input");
-      button.type = "button";
-      button.value = name;
-
-      button.addEventListener("click", function()
-      {
-        suite.run(true);
-      });
-      
-      td_run.appendChild(button);
-      
-      table.appendChild(tr);
-    }
-    
-    console.log(global_suites);
-  }
-   
-  create_test = function(name, test)
-  {
-    var suite = new Benchmark.Suite;
-    
-    var i = global_suites.length;
-    
-    global_suites[i] = {};
-    global_suites[i].name = name;
-    global_suites[i].suite = suite;
-      
-    suite.on('cycle', cycle);
-    suite.on('complete', complete);
-    
-    for(var i=0; i<test.length; ++i)
-      suite.add(test[i]);
-  };
-  
-  function run_all()
-  {
-    for(var i=0; i<global_suites.length; ++i)
-      global_suites[i].suite.run();
-  }
-  
   function init()
   {
-    var applet = document.createElement("applet");
-    applet.code = "nano";
-    applet.archive = "benchmark.js/nano.jar";
-    applet.width = 10;
-    applet.height = 10;
-    document.body.insertBefore(applet, document.body.firstChild);
-
+    init_test();
+    
     // TESTS
     
     create_test("mat4x4 (indentity)", [
+      function() { var temp = new math.mat4x4(); },
       function() { var temp = new x3dom.fields.SFMatrix4f(); },
-      function() { var temp = new math.mat4x4(); }
+      function() { var temp = mat4.create(); mat4.identity(temp); }
     ]);
     
     create_test("mat4x4 (single values)", [
-      function() { var temp = new x3dom.fields.SFMatrix4f(1,0,0,0, 0,1,0,0, 0,0,1,0, 0,0,0,1); },
-      function() { var temp = new math.mat4x4(1,0,0,0, 0,1,0,0, 0,0,1,0, 0,0,0,1); }
+      function() { var temp = new math.mat4x4(1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16); },
+      function() { var temp = new x3dom.fields.SFMatrix4f(1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16); },
+      {}
     ]);
     
     create_test("mat4x4 (array)", [
-      function() { var temp = new x3dom.fields.SFMatrix4f([1,0,0,0, 0,1,0,0, 0,0,1,0, 0,0,0,1]); },
-      function() { var temp = new math.mat4x4(); }
+      function() { var temp = new math.mat4x4([1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16]); },
+      {},
+      function() { var temp = mat4.create([1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16]); }
+    ]);
+    
+    create_test("mat4x4 (array)", [
+      function() { var temp = new math.mat4x4([1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16]); },
+      {},
+      function() { var temp = mat4.create([1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16]); }
     ]);
 
     // TESTS
@@ -168,16 +53,17 @@
 <body onLoad="init();" style="background-color:#EEE">
   <article style="width:80em; margin:0 auto; background:#FFF; display:block; font-family:sans-serif">
     <article style="background:#FFF; padding:2em 2em;">
-      <table border="0" cellpadding="1" callspacing="20" style="width:100%; text-align:center; background-color:#CCC">
+      <table border="0" cellpadding="1" callspacing="20" style="width:100%; text-align:center; background-color:#CCC;">
         <thead>
           <tr style="background-color:#CCC; color:#FFF">
-            <th >Test</th>
-            <th width="400px">fields.js</th>
-            <th width="400px">math.js</th>
-            <th width="200px">Speedup %</th>
+            <th>Test</th>
+            <th width="150px">math.js</th>
+            <th width="250px">fields.js</th>
+            <th width="250px">glMatrix.js</th>
+            <th width="200px">Result</th>
           </tr>
         </thead>
-        <tbody id="results" style="color:#333">
+        <tbody id="results" style="color:#333; font-size:x-small">
         </tbody>
       </table>
     </article>

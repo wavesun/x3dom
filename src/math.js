@@ -15,34 +15,19 @@ math = {};
 
 math.Eps = 0.000001;
 
+var force_native_arrays = true;
+
 /** Float32Array  */
-if(typeof Float32Array != 'undefined') {
+if(typeof Float32Array != 'undefined' && !force_native_arrays)
   math.Float32Array = Float32Array;
-}
-else if(typeof WebGLFloatArray != 'undefined') {
+else if(typeof WebGLFloatArray != 'undefined' && !force_native_arrays) 
   math.Float32Array = WebGLFloatArray;
-}
-else {
+else
   math.Float32Array = Array;
-}
 
-math.mat4x4 = function(args)
+math.mat4x4 = function()
 {
-  /** 4x4 Matrix constructor. */
-  math.mat4x4.constructor = function(_00, _01, _02, _03, _10, _11, _12, _13, _20, _21, _22, _23, _30, _31, _32, _33)
-  {
-    this._m = new math.Float32Array(16);
-
-    if (arguments.length == 0)
-      math.mat4x4.prototype.identity(this);
-    else
-    {
-      this._m[00] = _00; this._m[01] = _01; this._m[02] = _02; this._m[03] = _03;
-      this._m[04] = _10; this._m[05] = _11; this._m[06] = _12; this._m[07] = _13;
-      this._m[08] = _20; this._m[09] = _21; this._m[10] = _22; this._m[11] = _23;
-      this._m[12] = _30; this._m[13] = _31; this._m[14] = _32; this._m[15] = _33;
-    }
-  };
+  this._m = new math.Float32Array(16);
   
   /** Sets a 4x4 matrix to identity */
   math.mat4x4.prototype.identity = function(mat)
@@ -52,6 +37,17 @@ math.mat4x4 = function(args)
     mat._m[08] = 0; mat._m[09] = 0; mat._m[10] = 1; mat._m[11] = 0;
     mat._m[12] = 0; mat._m[13] = 0; mat._m[14] = 0; mat._m[15] = 1;
   };
+  
+  if(arguments.length == 1 && typeof arguments[0] == "object")
+    for(var i=0; i<16; ++i)
+      this._m[i] = arguments[0][i];
+      
+  else if(arguments.length == 16)
+    for(var i=0; i<16; ++i)
+      this._m[i] = arguments[i];
+      
+  else
+    math.mat4x4.prototype.identity(this);
 };
 
 /** returns 1st base vector (right) */
