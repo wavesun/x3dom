@@ -1,6 +1,8 @@
 var all_suites = [];
 var table_names = ["fields.js", "math.js", "glMatrix.js"]
 
+var test_queue = [];
+
 function init_test()
 {
   var applet = document.createElement("applet");
@@ -22,7 +24,6 @@ cycle = function(event, bench)
   var result = bench.result_out;
   
   var div_ops = document.createElement("div");
-  //div_ops.style.float = "left";
   
   div_ops.innerHTML  = formatNumber(bench.hz.toFixed());
   div_ops.title      = "+/- " + bench.stats.rme.toFixed(2) + "% ";
@@ -57,19 +58,10 @@ complete = function()
 {
   var delta = this.delta_out;
   
-  /*
-  var math = this[0];
-  var fields = this[1];
+  test_queue.shift();
   
-  var frequency_delta = ((100 / fields.hz) *  math.hz).toFixed(2);
-  
-  if(frequency_delta < 100)
-    delta.style.backgroundColor = "#C55";
-  else
-    delta.style.backgroundColor = "#5C5";
-  
-  delta.innerHTML = frequency_delta;
-  */
+  if(test_queue[0])
+    test_queue[0].suite.run(true);
 }
 
 setup_table = function()
@@ -91,29 +83,28 @@ setup_table = function()
     tr.appendChild(td_run);
     
     // tests
+    var current_id = 0;
     for(var test_id=0; test_id<table_names.length; ++test_id)
     {
-      var test = suite[test_id];
+      var test = suite[current_id];
 
       var current_test = 0;
       if(test)
         current_test = test.id-1;
-      
+
       // fill empty tests
       if(test_id != current_test)
       {
         var td_result = document.createElement("td");
-        //td_result.style.textAlign = "center";
         td_result.id = "result_" + suite_id + "_" + test_id;
         
         td_result.innerHTML = "unavailable";
         td_result.style.color = "#C55";
         tr.appendChild(td_result);
-        test_id++;
       }
         
       // add test
-      if(test)
+      else
       {
         var td_result = document.createElement("td");
         td_result.style.textAlign = "center";
@@ -122,6 +113,7 @@ setup_table = function()
         
         test.result_out = td_result;
         tr.appendChild(td_result);
+        current_id++;
       }
     }
     
@@ -180,5 +172,8 @@ create_test = function(name, test)
 function run_all()
 {
   for(var i=0; i<all_suites.length; ++i)
-    all_suites[i].suite.run();
+    test_queue.push(all_suites[i]);
+  
+  if(test_queue[0])
+    test_queue[0].suite.run(true);
 }
