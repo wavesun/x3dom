@@ -1,5 +1,5 @@
 var all_suites = [];
-var table_names = ["fields.js", "math.js", "glMatrix.js"]
+var table_names = ["fields.js", "math.js", "glMatrix.js", "mjs.js", "sylvester.js"]
 
 var test_queue = [];
 

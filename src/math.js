@@ -15,16 +15,14 @@ math = {};
 
 math.Eps = 0.000001;
 
-var force_native_arrays = false;
-
 /** Float32Array  */
-if(typeof Float32Array != "undefined" && !force_native_arrays)
+if(typeof Float32Array != "undefined")
   math.Float32Array = Float32Array;
-else if(typeof WebGLFloatArray != "undefined" && !force_native_arrays) 
+else if(typeof WebGLFloatArray != "undefined") 
   math.Float32Array = WebGLFloatArray;
 else
   math.Float32Array = Array;
-
+  
 /** The Vector[2] */
 math.vec2 = 
 {
@@ -44,6 +42,12 @@ math.vec2 =
     }
     
     return vec;
+  },
+  
+  negate : function(vec)
+  {
+    vec[0] = -vec[0];
+    vec[1] = -vec[1];
   },
   
   add : function(left, right, result)
@@ -107,6 +111,13 @@ math.vec3 =
     }
     
     return vec;
+  },
+  
+  negate : function(vec)
+  {
+    vec[0] = -vec[0];
+    vec[1] = -vec[1];
+    vec[2] = -vec[2];
   },
   
   add : function(left, right, result)
@@ -190,6 +201,14 @@ math.vec4 =
     }
     
     return vec;
+  },
+  
+  negate : function(vec)
+  {
+    vec[0] = -vec[0];
+    vec[1] = -vec[1];
+    vec[2] = -vec[2];
+    vec[3] = -vec[3];
   },
   
   add : function(left, right, result)
@@ -311,22 +330,22 @@ math.mat4x4 =
         r20 = right[08], r21 = right[09], r22 = right[10], r23 = right[11],
         r30 = right[12], r31 = right[13], r32 = right[14], r33 = right[15];
 
-    result[00] = (l00*r00) + (l10*r01) + (l20*r02) + (l30*r03);
-    result[01] = (l01*r00) + (l11*r01) + (l21*r02) + (l31*r03);
-    result[02] = (l02*r00) + (l12*r01) + (l22*r02) + (l32*r03);
-    result[03] = (l03*r00) + (l13*r01) + (l23*r02) + (l33*r03);
-    result[04] = (l00*r10) + (l10*r11) + (l20*r12) + (l30*r13);
-    result[05] = (l01*r10) + (l11*r11) + (l21*r12) + (l31*r13);
-    result[06] = (l02*r10) + (l12*r11) + (l22*r12) + (l32*r13);
-    result[07] = (l03*r10) + (l13*r11) + (l23*r12) + (l33*r13);
-    result[08] = (l00*r20) + (l10*r21) + (l20*r22) + (l30*r23);
-    result[09] = (l01*r20) + (l11*r21) + (l21*r22) + (l31*r23);
-    result[10] = (l02*r20) + (l12*r21) + (l22*r22) + (l32*r23);
-    result[11] = (l03*r20) + (l13*r21) + (l23*r22) + (l33*r23);
-    result[12] = (l00*r30) + (l10*r31) + (l20*r32) + (l30*r33);
-    result[13] = (l01*r30) + (l11*r31) + (l21*r32) + (l31*r33);
-    result[14] = (l02*r30) + (l12*r31) + (l22*r32) + (l32*r33);
-    result[15] = (l03*r30) + (l13*r31) + (l23*r32) + (l33*r33);
+    result[00] = l00*r00 + l10*r01 + l20*r02 + l30*r03, 
+    result[01] = l01*r00 + l11*r01 + l21*r02 + l31*r03, 
+    result[02] = l02*r00 + l12*r01 + l22*r02 + l32*r03, 
+    result[03] = l03*r00 + l13*r01 + l23*r02 + l33*r03, 
+    result[04] = l00*r10 + l10*r11 + l20*r12 + l30*r13, 
+    result[05] = l01*r10 + l11*r11 + l21*r12 + l31*r13, 
+    result[06] = l02*r10 + l12*r11 + l22*r12 + l32*r13, 
+    result[07] = l03*r10 + l13*r11 + l23*r12 + l33*r13, 
+    result[08] = l00*r20 + l10*r21 + l20*r22 + l30*r23, 
+    result[09] = l01*r20 + l11*r21 + l21*r22 + l31*r23, 
+    result[10] = l02*r20 + l12*r21 + l22*r22 + l32*r23, 
+    result[11] = l03*r20 + l13*r21 + l23*r22 + l33*r23, 
+    result[12] = l00*r30 + l10*r31 + l20*r32 + l30*r33, 
+    result[13] = l01*r30 + l11*r31 + l21*r32 + l31*r33, 
+    result[14] = l02*r30 + l12*r31 + l22*r32 + l32*r33,
+    result[15] = l03*r30 + l13*r31 + l23*r32 + l33*r33;
   },
   
   transpose : function(mat)
@@ -336,10 +355,10 @@ math.mat4x4 =
         m08 =  mat[08], m09 =  mat[09],                 m11 =  mat[11],
         m12 =  mat[12], m13 =  mat[13], m14 =  mat[14];
         
-                   mat[01] = m04; mat[02] = m08; mat[03] = m12;
-    mat[04] = m01;                mat[06] = m09; mat[07] = m13; 
-    mat[08] = m02; mat[09] = m06;                mat[11] = m14; 
-    mat[12] = m03; mat[13] = m07; mat[14] = m11;
+                   mat[01] = m04, mat[02] = m08, mat[03] = m12,
+    mat[04] = m01,                mat[06] = m09, mat[07] = m13,
+    mat[08] = m02, mat[09] = m06,                mat[11] = m14, 
+    mat[12] = m03, mat[13] = m07, mat[14] = m11;
   },
   
   /** 1st base vector (right) */
