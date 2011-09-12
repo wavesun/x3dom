@@ -177,3 +177,9 @@ function run_all()
   if(test_queue[0])
     test_queue[0].suite.run(true);
 }
+
+function run_all_at_once()
+{
+  for(var i=0; i<all_suites.length; ++i)
+    all_suites[i].suite.run(true);
+}
