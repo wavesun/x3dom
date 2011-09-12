@@ -98,6 +98,10 @@ function setup()
   var v4_1_sylvester  = Vector.create([v_4[0], v_4[1], v_4[2], v_4[3]]);
   var v4_2_sylvester  = Vector.create([0, 0, 0, 0]);
   
+  var m4_0_sylvester  = Matrix.create([m_4x4[00], m_4x4[01], m_4x4[02], m_4x4[03]],[m_4x4[04], m_4x4[05], m_4x4[06], m_4x4[07]],[m_4x4[08], m_4x4[09], m_4x4[10], m_4x4[11]],[m_4x4[12], m_4x4[13], m_4x4[14], m_4x4[15]]);
+  var m4_1_sylvester  = Matrix.create([m_4x4[00], m_4x4[01], m_4x4[02], m_4x4[03]],[m_4x4[04], m_4x4[05], m_4x4[06], m_4x4[07]],[m_4x4[08], m_4x4[09], m_4x4[10], m_4x4[11]],[m_4x4[12], m_4x4[13], m_4x4[14], m_4x4[15]]);
+  var m4_2_sylvester  = Matrix.create([[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0]]);
+  
   // TESTS //////////////////////////////////////
   
   // TESTS //////////////////////////////////////
@@ -287,6 +291,14 @@ function setup()
     function() { math.mat4x4.transpose(m4_0_math); },
     function() { m4_0_x3dom = m4_0_x3dom.transpose(); },
     function() { mat4.transpose(m4_0_glmatrix); },
+  ]);
+  
+  create_test("mat4x4 (inverse)", [
+    {},
+    function() { m4_0_x3dom = m4_0_x3dom.inverse(); },
+    function() { mat4.inverse(m4_0_glmatrix, m4_1_glmatrix); },
+    function() { M4x4.inverseOrthonormal(m4_0_mjs, m4_1_mjs) },
+    function() { m4_1_sylvester = m4_0_sylvester.inverse(); }
   ]);
 
   
