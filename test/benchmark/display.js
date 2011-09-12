@@ -40,8 +40,10 @@ cycle = function(event, bench)
     var div_diff = document.createElement("div");
     div_diff.innerHTML = speedup + "%";
     
-    if(speedup < 100)
+    if(speedup < 90)
       div_diff.style.backgroundColor = "#C55";
+    else if(speedup < 110)
+      div_diff.style.backgroundColor = "#3CF";
     else
       div_diff.style.backgroundColor = "#5C5";
       
