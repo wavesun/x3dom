@@ -104,14 +104,6 @@ function setup()
   
   // TESTS //////////////////////////////////////
   
-  math.mat4x4.inverse(m4_0_math);
-  math.mat4x4.inverse(m4_0_math);
-  console.log(m4_0_math);
-  
-  var m_x2 = m4_0_x3dom.inverse();
-  var m_x3 = m_x2.inverse();
-  console.log(m_x3);
-  
   // TESTS //////////////////////////////////////
   
   // vec2
@@ -302,7 +294,7 @@ function setup()
   ]);
   
   create_test("mat4x4 (inverse)", [
-    {},
+    function() { math.mat4x4.inverse(m4_0_math); },
     function() { m4_0_x3dom = m4_0_x3dom.inverse(); },
     function() { mat4.inverse(m4_0_glmatrix, m4_1_glmatrix); },
     function() { M4x4.inverseOrthonormal(m4_0_mjs, m4_1_mjs);},
