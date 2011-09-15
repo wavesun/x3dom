@@ -502,6 +502,24 @@ math.mat4x4 =
     mat[15] = 1;
   },
   
+  lookAt2 : function(eye, at, up, mat)
+  {
+    var dir = math.vec3.create();
+    var newup = math.vec3.create();
+    var temp = math.mat4x4.create();
+    var right = math.mat4x4.create();
+    
+    math.vec3.subtract(eye, at, dir);
+    math.vec3.normalize(dir);
+    math.vec3.cross(up, dir, right);
+    
+    math.vec3.normalize(right);
+    math.vec3.cross(dir, right, newup);
+    math.vec3.normalize(newup);
+    
+    this.mult(mat, temp, mat);
+  },
+  
   /** 1st base vector (right) */
   e0 : function(mat, vec)
   {
