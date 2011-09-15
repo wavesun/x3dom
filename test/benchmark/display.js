@@ -164,8 +164,8 @@ create_test = function(name, test)
     if(typeof test[i] == "function")
     {
       var benchmark = new Benchmark(name, test[i], {"id" : i+1});
-      benchmark.suite_id = suite_id;
       
+      benchmark.suite_id = suite_id;
       suite.push(benchmark);
     }
   }

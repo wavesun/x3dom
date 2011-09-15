@@ -46,25 +46,25 @@ math.vec2 =
   
   negate : function(vec)
   {
-    vec[0] = -vec[0];
+    vec[0] = -vec[0],
     vec[1] = -vec[1];
   },
   
   add : function(left, right, result)
   {
-    result[0] = left[0] + right[0];
+    result[0] = left[0] + right[0],
     result[1] = left[1] + right[1];
   },
   
   subtract : function(left, right, result)
   {
-    result[0] = left[0] - right[0];
+    result[0] = left[0] - right[0],
     result[1] = left[1] - right[1];
   },
   
   dot : function(left, right)
   {
-    return (left[0] * right[0] + left[1] * right[1]);
+    return left[0] * right[0] + left[1] * right[1];
   },
   
   length : function(vec)
@@ -115,59 +115,58 @@ math.vec3 =
   
   negate : function(vec)
   {
-    vec[0] = -vec[0];
-    vec[1] = -vec[1];
+    vec[0] = -vec[0],
+    vec[1] = -vec[1],
     vec[2] = -vec[2];
   },
   
   add : function(left, right, result)
   {
-    result[0] = left[0] + right[0];
-    result[1] = left[1] + right[1];
+    result[0] = left[0] + right[0],
+    result[1] = left[1] + right[1],
     result[2] = left[2] + right[2];
   },
   
   subtract : function(left, right, result)
   {
-    result[0] = left[0] - right[0];
-    result[1] = left[1] - right[1];
+    result[0] = left[0] - right[0],
+    result[1] = left[1] - right[1],
     result[2] = left[2] - right[2];
   },
   
   dot : function(left, right)
   {
-    return (left[0] * right[0] + left[1] * right[1] + left[2] * right[2]);
+    return left[0] * right[0] + left[1] * right[1] + left[2] * right[2];
   },
   
   cross : function(left, right, result)
   {
-    var xl = left[0];
-    var yl = left[1];
-    var zl = left[2];
+    var xl = left[0],
+        yl = left[1],
+        zl = left[2]
+        xr = right[0],
+        yr = right[1],
+        zr = right[2];
     
-    var xr = right[0];
-    var yr = right[1];
-    var zr = right[2];
-    
-    result[0] = (yl * zr) - (zl * yr); 
-    result[1] = (zl * xr) - (xl * zr); 
+    result[0] = (yl * zr) - (zl * yr),
+    result[1] = (zl * xr) - (xl * zr),
     result[2] = (xl * yr) - (yl * xr);
   },
   
   length : function(vec)
   {
-    var x = vec[0];
-    var y = vec[1];
-    var z = vec[2];
+    var x = vec[0],
+        y = vec[1],
+        z = vec[2];
     
     return Math.sqrt(x*x + y*y + z*z);
   },
   
   normalize : function(vec)
   {
-    var x = vec[0];
-    var y = vec[1];
-    var z = vec[2];
+    var x = vec[0],
+        y = vec[1],
+        z = vec[2];
     
     var n = Math.sqrt(x*x + y*y + z*z);
     
@@ -176,8 +175,8 @@ math.vec3 =
     else
       return;
       
-    vec[0] = x * n;
-    vec[1] = y * n;
+    vec[0] = x * n,
+    vec[1] = y * n,
     vec[2] = z * n;
   }
 };
@@ -205,49 +204,49 @@ math.vec4 =
   
   negate : function(vec)
   {
-    vec[0] = -vec[0];
-    vec[1] = -vec[1];
-    vec[2] = -vec[2];
+    vec[0] = -vec[0],
+    vec[1] = -vec[1],
+    vec[2] = -vec[2],
     vec[3] = -vec[3];
   },
   
   add : function(left, right, result)
   {
-    result[0] = left[0] + right[0];
-    result[1] = left[1] + right[1];
-    result[2] = left[2] + right[2];
+    result[0] = left[0] + right[0],
+    result[1] = left[1] + right[1],
+    result[2] = left[2] + right[2],
     result[3] = left[3] + right[3];
   },
   
   subtract : function(left, right, result)
   {
-    result[0] = left[0] - right[0];
-    result[1] = left[1] - right[1];
-    result[2] = left[2] - right[2];
+    result[0] = left[0] - right[0],
+    result[1] = left[1] - right[1],
+    result[2] = left[2] - right[2],
     result[3] = left[3] - right[3];
   },
   
   dot : function(left, right)
   {
-    return (left[0] * right[0] + left[1] * right[1] + left[2] * right[2] + left[3] * right[3]);
+    return left[0] * right[0] + left[1] * right[1] + left[2] * right[2] + left[3] * right[3];
   },
   
   length : function(vec)
   {
-    var x = vec[0];
-    var y = vec[1];
-    var z = vec[2];
-    var w = vec[3];
+    var x = vec[0],
+        y = vec[1],
+        z = vec[2],
+        w = vec[3];
     
     return Math.sqrt(x*x + y*y + z*z);
   },
   
   normalize : function(vec)
   {
-    var x = vec[0];
-    var y = vec[1];
-    var z = vec[2];
-    var w = vec[3];
+    var x = vec[0],
+        y = vec[1],
+        z = vec[2],
+        w = vec[3];
     
     var n = Math.sqrt(x*x + y*y + z*z + w*w);
     
@@ -256,9 +255,9 @@ math.vec4 =
     else
       return;
       
-    vec[0] = x * n;
-    vec[1] = y * n;
-    vec[2] = z * n;
+    vec[0] = x * n,
+    vec[1] = y * n,
+    vec[2] = z * n,
     vec[3] = w * n;
   }
 };
@@ -292,7 +291,12 @@ math.mat4x4 =
     }
     
     else
-      math.mat4x4.identity(mat);
+    {
+      mat[00] = 1, mat[01] = 0, mat[02] = 0, mat[03] = 0;
+      mat[04] = 0, mat[05] = 1, mat[06] = 0, mat[07] = 0;
+      mat[08] = 0, mat[09] = 0, mat[10] = 1, mat[11] = 0;
+      mat[12] = 0, mat[13] = 0, mat[14] = 0, mat[15] = 1;
+    }
 
     return mat;
   },
@@ -330,22 +334,22 @@ math.mat4x4 =
         r20 = right[08], r21 = right[09], r22 = right[10], r23 = right[11],
         r30 = right[12], r31 = right[13], r32 = right[14], r33 = right[15];
 
-    result[00] = l00*r00 + l10*r01 + l20*r02 + l30*r03, 
-    result[01] = l01*r00 + l11*r01 + l21*r02 + l31*r03, 
-    result[02] = l02*r00 + l12*r01 + l22*r02 + l32*r03, 
-    result[03] = l03*r00 + l13*r01 + l23*r02 + l33*r03, 
-    result[04] = l00*r10 + l10*r11 + l20*r12 + l30*r13, 
-    result[05] = l01*r10 + l11*r11 + l21*r12 + l31*r13, 
-    result[06] = l02*r10 + l12*r11 + l22*r12 + l32*r13, 
-    result[07] = l03*r10 + l13*r11 + l23*r12 + l33*r13, 
-    result[08] = l00*r20 + l10*r21 + l20*r22 + l30*r23, 
-    result[09] = l01*r20 + l11*r21 + l21*r22 + l31*r23, 
-    result[10] = l02*r20 + l12*r21 + l22*r22 + l32*r23, 
-    result[11] = l03*r20 + l13*r21 + l23*r22 + l33*r23, 
-    result[12] = l00*r30 + l10*r31 + l20*r32 + l30*r33, 
-    result[13] = l01*r30 + l11*r31 + l21*r32 + l31*r33, 
-    result[14] = l02*r30 + l12*r31 + l22*r32 + l32*r33,
-    result[15] = l03*r30 + l13*r31 + l23*r32 + l33*r33;
+    result[00] = l00 * r00 + l10 * r01 + l20 * r02 + l30 * r03, 
+    result[01] = l01 * r00 + l11 * r01 + l21 * r02 + l31 * r03, 
+    result[02] = l02 * r00 + l12 * r01 + l22 * r02 + l32 * r03, 
+    result[03] = l03 * r00 + l13 * r01 + l23 * r02 + l33 * r03, 
+    result[04] = l00 * r10 + l10 * r11 + l20 * r12 + l30 * r13, 
+    result[05] = l01 * r10 + l11 * r11 + l21 * r12 + l31 * r13, 
+    result[06] = l02 * r10 + l12 * r11 + l22 * r12 + l32 * r13, 
+    result[07] = l03 * r10 + l13 * r11 + l23 * r12 + l33 * r13, 
+    result[08] = l00 * r20 + l10 * r21 + l20 * r22 + l30 * r23, 
+    result[09] = l01 * r20 + l11 * r21 + l21 * r22 + l31 * r23, 
+    result[10] = l02 * r20 + l12 * r21 + l22 * r22 + l32 * r23, 
+    result[11] = l03 * r20 + l13 * r21 + l23 * r22 + l33 * r23, 
+    result[12] = l00 * r30 + l10 * r31 + l20 * r32 + l30 * r33, 
+    result[13] = l01 * r30 + l11 * r31 + l21 * r32 + l31 * r33, 
+    result[14] = l02 * r30 + l12 * r31 + l22 * r32 + l32 * r33,
+    result[15] = l03 * r30 + l13 * r31 + l23 * r32 + l33 * r33;
   },
   
   transpose : function(mat)
@@ -361,101 +365,141 @@ math.mat4x4 =
     mat[12] = m03, mat[13] = m07, mat[14] = m11;
   },
   
-  inverse : function(mat)
+  det : function(mat)
   {
-    // gauss-jordan
     var m00 = mat[00], m01 = mat[01], m02 = mat[02], m03 = mat[03],
         m10 = mat[04], m11 = mat[05], m12 = mat[06], m13 = mat[07],
         m20 = mat[08], m21 = mat[09], m22 = mat[10], m23 = mat[11],
         m30 = mat[12], m31 = mat[13], m32 = mat[14], m33 = mat[15];
+    
+    var d0 = m00 * ((m11 * m22 * m33 + m12 * m23 * m31 + m13 * m21 * m32) -
+                    (m11 * m23 * m32 + m12 * m21 * m33 + m13 * m22 * m31));
+                    
+    var d1 = m10 * ((m01 * m22 * m33 + m02 * m23 * m31 + m03 * m21 * m32) -
+                    (m01 * m23 * m32 + m02 * m21 * m33 + m03 * m22 * m31));
+                    
+    var d2 = m20 * ((m01 * m12 * m33 + m02 * m13 * m31 + m03 * m11 * m32) -
+                   (m01 * m13 * m32 + m02 * m11 * m33 + m03 * m12 * m31));
+                   
+    var d3 = m30 * ((m01 * m12 * m23 + m02 * m13 * m21 + m03 * m11 * m22) -
+                   (m01 * m13 * m22 + m02 * m11 * m23 + m03 *m12 * m21));
+                   
+   return d0 - d1 + d2 - d3;
+  },
+  
+  inverse : function(mat)
+  {
+    /*
+    if(this.det(mat) == 0)
+      return;
+    */
+    
+    // based on code of glMatrix.js (Brandon Jones 2011)
+    var m00 = mat[00], m01 = mat[01], m02 = mat[02], m03 = mat[03],
+        m10 = mat[04], m11 = mat[05], m12 = mat[06], m13 = mat[07],
+        m20 = mat[08], m21 = mat[09], m22 = mat[10], m23 = mat[11],
+        m30 = mat[12], m31 = mat[13], m32 = mat[14], m33 = mat[15];
+
+    var d00 = m00 * m11 - m01 * m10,
+        d01 = m00 * m12 - m02 * m10,
+        d02 = m00 * m13 - m03 * m10,
+        d03 = m01 * m12 - m02 * m11,
+        d04 = m01 * m13 - m03 * m11,
+        d05 = m02 * m13 - m03 * m12,
+        d06 = m20 * m31 - m21 * m30,
+        d07 = m20 * m32 - m22 * m30,
+        d08 = m20 * m33 - m23 * m30,
+        d09 = m21 * m32 - m22 * m31,
+        d10 = m21 * m33 - m23 * m31,
+        d11 = m22 * m33 - m23 * m32;
+
+    var det_inv = 1.0 / (d00 * d11 - d01 * d10 + d02 * d09 + d03 * d08 - d04 * d07 + d05 * d06);
+
+    mat[00] = ( m11 * d11 - m12 * d10 + m13 * d09) * det_inv;
+    mat[01] = (-m01 * d11 + m02 * d10 - m03 * d09) * det_inv;
+    mat[02] = ( m31 * d05 - m32 * d04 + m33 * d03) * det_inv;
+    mat[03] = (-m21 * d05 + m22 * d04 - m23 * d03) * det_inv;
+    mat[04] = (-m10 * d11 + m12 * d08 - m13 * d07) * det_inv;
+    mat[05] = ( m00 * d11 - m02 * d08 + m03 * d07) * det_inv;
+    mat[06] = (-m30 * d05 + m32 * d02 - m33 * d01) * det_inv;
+    mat[07] = ( m20 * d05 - m22 * d02 + m23 * d01) * det_inv;
+    mat[08] = ( m10 * d10 - m11 * d08 + m13 * d06) * det_inv;
+    mat[09] = (-m00 * d10 + m01 * d08 - m03 * d06) * det_inv;
+    mat[10] = ( m30 * d04 - m31 * d02 + m33 * d00) * det_inv;
+    mat[11] = (-m20 * d04 + m21 * d02 - m23 * d00) * det_inv;
+    mat[12] = (-m10 * d09 + m11 * d07 - m12 * d06) * det_inv;
+    mat[13] = ( m00 * d09 - m01 * d07 + m02 * d06) * det_inv;
+    mat[14] = (-m30 * d03 + m31 * d01 - m32 * d00) * det_inv;
+    mat[15] = ( m20 * d03 - m21 * d01 + m22 * d00) * det_inv;
+  },
+  
+  translate : function(mat, vec)
+  {
+    mat[03] = vec[0];
+    mat[13] = vec[1];
+    mat[23] = vec[2];
+  },
+
+  scale : function(mat, vec)
+  {
+    mat[00] = vec[0];
+    mat[11] = vec[1];
+    mat[22] = vec[2];
+  },
+  
+  lookAt : function(eye, at, up, mat)
+  {
+    var eye_x = eye[0], eye_y = eye[1], eye_z = eye[0],
+        at_x  = at[0],  at_y  = at[1],  at_z  = at[2],
+        up_x  = up[2],  up_y  = up[2],  up_z  = up[2];
         
-    var r00 = 1,       r01 = 0,       r02 = 0,       r03 = 0,
-        r10 = 0,       r11 = 1,       r12 = 0,       r13 = 0,
-        r20 = 0,       r21 = 0,       r22 = 1,       r23 = 0,
-        r30 = 0,       r31 = 0,       r32 = 0,       r33 = 1;
+    if(eye_x == at_x && eye_x == at_x && eye_x == at_x)
+    {
+      this.identity(mat);
+      return;
+    }
     
-    var r00 = 1.0 / m00,
-        r11 = 1.0 / m11,
-        r22 = 1.0 / m22,
-        r33 = 1.0 / m33;
-        
-        m00 *= r00,    m01 *= r00,    m02 *= r00,    m03 *= r00,
-        m10 *= r11,    m11 *= r11,    m12 *= r11,    m13 *= r11,
-        m20 *= r22,    m21 *= r22,    m22 *= r22,    m23 *= r22,
-        m30 *= r33,    m31 *= r33,    m32 *= r33,    m33 *= r33;
-        
-    var f10 = m10,
-        f20 = m20,
-        f30 = m30;
-        
-    /*            */  /*            */  /*            */  /*            */
-    r10 -= f10 * r00, r11 -= f10 * r01, r12 -= f10 * r02, r13 -= f10 * r03,
-    r20 -= f20 * r00, r21 -= f20 * r01, r22 -= f20 * r02, r23 -= f20 * r03,
-    r30 -= f30 * r00, r31 -= f30 * r01, r32 -= f30 * r02, r33 -= f30 * r03;
+    // math.vec3.subtract(eye, at, dir);
+    var dir_x = eye_x - at_x,
+        dir_y = eye_y - at_y,
+        dir_z = eye_z - at_z;
     
-    /*            */  /*            */  /*            */  /*            */
-    m10 -= f10 * m00, m11 -= f10 * m01, m12 -= f10 * m02, m13 -= f10 * m03,
-    m20 -= f20 * m00, m21 -= f20 * m01, m22 -= f20 * m02, m23 -= f20 * m03,
-    m30 -= f30 * m00, m31 -= f30 * m01, m32 -= f30 * m02, m33 -= f30 * m03;
+    // math.vec3.normalize(dir);
+    var n_dir = 1.0 / Math.sqrt(dir_x*dir_x + dir_y*dir_y + dir_z*dir_z);
+    dir_x *= n_dir,
+    dir_y *= n_dir,
+    dir_z *= n_dir;
     
-    var s1 = 1.0 / m11;
-    m10 *= s1, m11 *= s1, m12 *= s1, m13 *= s1,
-    r10 *= s1, r11 *= s1, r12 *= s1, r13 *= s1;
+    // math.vec3.cross(up, dir, right);
+    var right_x = up_y*dir_z - up_z*dir_y,
+        right_y = up_z*dir_x - up_x*dir_z,
+        right_z = up_x*dir_y - up_y*dir_x;
     
-    var f01 = m01,
-        f21 = m21,
-        f31 = m31;
-        
-    r00 -= f01 * r10, r01 -= f01 * r11, r02 -= f01 * r12, r03 -= f01 * r13,
-    /*            */  /*            */  /*            */  /*            */
-    r20 -= f21 * r10, r21 -= f21 * r11, r22 -= f21 * r12, r23 -= f21 * r13,
-    r30 -= f31 * r10, r31 -= f31 * r11, r32 -= f31 * r12, r33 -= f31 * r13;
+    // math.vec3.normalize(right);
+    var n_right = 1.0 / Math.sqrt(dir_x*dir_x + dir_y*dir_y + dir_z*dir_z);
+    right_x *= n_right,
+    right_y *= n_right,
+    right_z *= n_right;
     
-    m00 -= f01 * m10, m01 -= f01 * m11, m02 -= f01 * m12, m03 -= f01 * m13,
-    /*            */  /*            */  /*            */  /*            */
-    m20 -= f21 * m10, m21 -= f21 * m11, m22 -= f21 * m12, m23 -= f21 * m13,
-    m30 -= f31 * m10, m31 -= f31 * m11, m32 -= f31 * m12, m33 -= f31 * m13;
+    // math.vec3.cross(dir, right, newup);
+    var newup_x = dir_y*right_z - dir_z*right_y,
+        newup_y = dir_z*right_x - dir_x*right_z,
+        newup_z = dir_x*right_y - dir_y*right_x;
     
-    var s2 = 1.0 / m22;
-    m20 *= s2, m21 *= s2, m22 *= s2, m23 *= s2,
-    r20 *= s2, r21 *= s2, r22 *= s2, r23 *= s2;
-    
-    var f02 = m02,
-        f12 = m12,
-        f32 = m32;
-        
-    r00 -= f02 * r20, r01 -= f02 * r21, r02 -= f02 * r22, r03 -= f02 * r23,
-    r10 -= f12 * r20, r11 -= f12 * r21, r12 -= f12 * r22, r13 -= f12 * r23,
-    /*            */  /*            */  /*            */  /*            */
-    r30 -= f32 * r20, r31 -= f32 * r21, r32 -= f32 * r22, r33 -= f32 * r23;
-    
-    m00 -= f02 * m20, m01 -= f02 * m21, m02 -= f02 * m22, m03 -= f02 * m23,
-    m10 -= f12 * m20, m11 -= f12 * m21, m12 -= f12 * m22, m13 -= f12 * m23,
-    /*            */  /*            */  /*            */  /*            */
-    m30 -= f32 * m20, m31 -= f32 * m21, m32 -= f32 * m22, m33 -= f32 * m23;
-    
-    var s3 = 1.0 / m33;
-    m30 *= s3, m31 *= s3, m32 *= s3, m33 *= s3,
-    r30 *= s3, r31 *= s3, r32 *= s3, r33 *= s3;
-    
-    var f03 = m03,
-        f13 = m13,
-        f23 = m23;
-        
-    r00 -= f03 * r30, r01 -= f03 * r31, r02 -= f03 * r32, r03 -= f03 * r33,
-    r10 -= f13 * r30, r11 -= f13 * r31, r12 -= f13 * r32, r13 -= f13 * r33,
-    r20 -= f23 * r30, r21 -= f23 * r31, r22 -= f23 * r32, r23 -= f23 * r33;
-    /*            */  /*            */  /*            */  /*            */
-    
-    m00 -= f03 * m30, m01 -= f03 * m31, m02 -= f03 * m32, m03 -= f03 * m33,
-    m10 -= f13 * m30, m11 -= f13 * m31, m12 -= f13 * m32, m13 -= f13 * m33,
-    m20 -= f23 * m30, m21 -= f23 * m31, m22 -= f23 * m32, m23 -= f23 * m33;
-    /*            */  /*            */  /*            */  /*            */
-    
-    mat[00] = r00, mat[01] = r01, mat[02] = r02, mat[03] = r03, 
-    mat[04] = r10, mat[05] = r11, mat[06] = r12, mat[07] = r13, 
-    mat[08] = r20, mat[09] = r21, mat[10] = r22, mat[11] = r23, 
-    mat[12] = r30, mat[13] = r31, mat[14] = r32, mat[15] = r33;
+    // math.vec3.normalize(newup);
+    var n_newup = 1.0 / Math.sqrt(newup_x*newup_x + newup_y*newup_y + newup_z*newup_z);
+    newup_x *= n_newup,
+    newup_y *= n_newup,
+    newup_z *= n_newup;
+
+    // this.mult(mat, temp, mat);
+    mat[00] = right_x, mat[01] = newup_x, mat[02] = dir_x, mat[03] = 0,
+    mat[04] = right_y, mat[05] = newup_y, mat[06] = dir_y, mat[07] = 0,
+    mat[08] = right_z, mat[09] = newup_z, mat[10] = dir_z, mat[11] = 0,
+    mat[12] = -(right_x * eye_x + right_y * eye_y + right_z * eye_z),
+    mat[13] = -(newup_x * eye_x + newup_y * eye_y + newup_z * eye_z),
+    mat[14] = -(dir_x   * eye_x + dir_x   * eye_y + dir_x   * eye_z),
+    mat[15] = 1;
   },
   
   /** 1st base vector (right) */
@@ -494,5 +538,89 @@ math.mat4x4 =
     vec[0] = mat[03];
     vec[1] = mat[07];
     vec[2] = mat[11];
+  }
+};
+  
+/** The Quaternion */
+math.quat = 
+{
+  create : function()
+  {
+    var quat = new math.Float32Array(3);
+    
+    if(arguments.length)
+    {
+      if(typeof arguments[0] == "object")
+        for(var i=0; i<4; ++i)
+          quat[i] = arguments[0][i];
+          
+      else
+        for(var i=0; i<4; ++i)
+          quat[i] = arguments[i];
+    }
+    
+    return quat;
+  },
+  
+  negate : function(quat)
+  {
+    quat[0] = -quat[0],
+    quat[1] = -quat[1],
+    quat[2] = -quat[2],
+    quat[3] = -quat[3];
+  },
+  
+  add : function(left, right, result)
+  {
+    result[0] = left[0] + right[0],
+    result[1] = left[1] + right[1],
+    result[2] = left[2] + right[2],
+    result[3] = left[3] + right[3];
+  },
+  
+  subtract : function(left, right, result)
+  {
+    result[0] = left[0] - right[0],
+    result[1] = left[1] - right[1],
+    result[2] = left[2] - right[2],
+    result[3] = left[3] - right[3];
+  },
+  
+  dot : function(left, right)
+  {
+    return left[0] * right[0] + left[1] * right[1] + left[2] * right[2] + left[3] * right[3];
+  },
+  
+  mult : function(left, right, result)
+  {
+    result[0] = left[3] * right[0] + left[0] * right[3] + left[1] * right[2] - left[2] * right[1],
+    result[1] = left[3] * right[1] + left[1] * right[3] + left[2] * right[0] - left[0] * right[2],
+    result[2] = left[3] * right[2] + left[2] * right[3] + left[0] * right[1] - left[1] * right[0],
+    result[3] = left[3] * right[3] - left[0] * right[0] - left[1] * right[1] - left[2] * right[2];
+  },
+  
+  inverse : function(quat)
+  {
+    quat[0] = -quat[0],
+    quat[1] = -quat[1],
+    quat[2] = -quat[2];
+  },
+  
+  normalize : function(quat)
+  {
+    var x = quat[0],
+        y = quat[1],
+        z = quat[2],
+        w = quat[3];
+    
+    var d = x*x + y*y + z*z + w*w;
+    if(d)
+    {
+      var f = 1.0 / Math.sqrt(d);
+      quat[0] *= f;
+      quat[1] *= f;
+      quat[2] *= f;
+      quat[3] *= f;
+    }
   }
 };
