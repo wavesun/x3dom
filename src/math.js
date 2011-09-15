@@ -491,23 +491,23 @@ math.mat4x4 =
     newup_x *= n_newup,
     newup_y *= n_newup,
     newup_z *= n_newup;
+    
+    var trans_x = -(right_x * eye_x + right_y * eye_y + right_z * eye_z),
+        trans_y = -(newup_x * eye_x + newup_y * eye_y + newup_z * eye_z),
+        trans_z = -(dir_x   * eye_x + dir_x   * eye_y + dir_x   * eye_z);
 
     // this.mult(mat, temp, mat);
-    mat[00] = right_x, mat[01] = newup_x, mat[02] = dir_x, mat[03] = 0,
-    mat[04] = right_y, mat[05] = newup_y, mat[06] = dir_y, mat[07] = 0,
-    mat[08] = right_z, mat[09] = newup_z, mat[10] = dir_z, mat[11] = 0,
-    mat[12] = -(right_x * eye_x + right_y * eye_y + right_z * eye_z),
-    mat[13] = -(newup_x * eye_x + newup_y * eye_y + newup_z * eye_z),
-    mat[14] = -(dir_x   * eye_x + dir_x   * eye_y + dir_x   * eye_z),
-    mat[15] = 1;
+    mat[00] = right_x, mat[01] = newup_x, mat[02] = dir_x,   mat[03] = 0,
+    mat[04] = right_y, mat[05] = newup_y, mat[06] = dir_y,   mat[07] = 0,
+    mat[08] = right_z, mat[09] = newup_z, mat[10] = dir_z,   mat[11] = 0,
+    mat[12] = trans_x, mat[13] = trans_y, mat[14] = trans_z, mat[15] = 1;
   },
   
   lookAt2 : function(eye, at, up, mat)
   {
     var dir = math.vec3.create();
     var newup = math.vec3.create();
-    var temp = math.mat4x4.create();
-    var right = math.mat4x4.create();
+    var right = math.vec3.create();
     
     math.vec3.subtract(eye, at, dir);
     math.vec3.normalize(dir);
@@ -517,7 +517,27 @@ math.mat4x4 =
     math.vec3.cross(dir, right, newup);
     math.vec3.normalize(newup);
     
-    this.mult(mat, temp, mat);
+    var right_x = right[0],
+        right_y = right[1],
+        right_z = right[2],
+        newup_x = newup[0],
+        newup_y = newup[1],
+        newup_z = newup[2],
+        dir_x   = dir[0],
+        dir_y   = dir[1],
+        dir_z   = dir[2],
+        eye_x   = eye[0],
+        eye_y   = eye[1],
+        eye_z   = eye[2];
+        
+    var trans_x = -(right_x * eye_x + right_y * eye_y + right_z * eye_z),
+        trans_y = -(newup_x * eye_x + newup_y * eye_y + newup_z * eye_z),
+        trans_z = -(dir_x   * eye_x + dir_x   * eye_y + dir_x   * eye_z);
+    
+    mat[00] = right_x, mat[01] = newup_x, mat[02] = dir_x,   mat[03] = 0,
+    mat[04] = right_y, mat[05] = newup_y, mat[06] = dir_y,   mat[07] = 0,
+    mat[08] = right_z, mat[09] = newup_z, mat[10] = dir_z,   mat[11] = 0,
+    mat[12] = trans_x, mat[13] = trans_y, mat[14] = trans_z, mat[15] = 1;
   },
   
   /** 1st base vector (right) */
