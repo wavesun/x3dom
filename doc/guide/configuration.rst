@@ -4,23 +4,25 @@
 Configuration
 =============
 
-The X3D element supports a param tag which allows to set configuration for
+The X3D element supports attributes and a param tag which allows to set configuration for
 the runtime.
 
 
 Usage
 -----
 The param element behaves just like any other HTML element. It must be
-nested below the scene element. For XHTML you can use the self-closing syntax,
+nested below the X3D element. For XHTML you can use the self-closing syntax,
 for HTML a closing tag is mandatory::
 
     <x3d>
+        <param name="showLog" value="true" ></param>
         <scene>
-            <param name="showLog" value="true" ></param>
             ...
         </scene>
     </x3d>
 
+Note: The param tag used to live as child of the scene element. This behavior has been changed with version 1.3 of
+X3DOM. You will get a deprecation warning and support will be removed in 1.4.
 
 Options
 -------
@@ -36,4 +38,6 @@ showProgress       true, false, bar           true            Hide or show the l
                                                               use a progress bar.
 PrimitiveQuality   High, Medium, Low, float   High/1.0        Render quality (tesselation level) for Box, Cone,
                                                               Cylinder, Sphere.
+component          String (i.e. Geometry3D)   none            Name of the component to load
+loadpath           String (i.e. nodes/)       none            The path or URI where to find the components
 =================  =========================  ===========     =================================================

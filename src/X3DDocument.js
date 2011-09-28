@@ -11,8 +11,8 @@
  */
 
 // ### X3DDocument ###
-x3dom.X3DDocument = function(canvas, ctx) {
-    this.properties = x3dom.Properties;
+x3dom.X3DDocument = function(canvas, ctx, settings) {
+    this.properties = settings;
     this.canvas = canvas;
     this.ctx = ctx;
     this.needRender = true;
@@ -169,23 +169,28 @@ x3dom.X3DDocument.prototype._setup = function (sceneDoc, uriDocs, sceneElemPos) 
 
 x3dom.X3DDocument.prototype.advanceTime = function (t) {
     var that;
+    var i;
 
     if (this._nodeBag.timer.length) {
         this.needRender = true;
-        Array.forEach( this._nodeBag.timer, function (node) { node.onframe(t); } );
+        for (i=0; i < this._nodeBag.timer.length; i++) { this._nodeBag.timer[i].onframe(t); }
+//        Array.forEach( this._nodeBag.timer, function (node) { node.onframe(t); } );
     }
     if (this._nodeBag.followers.length) {
         that = this;
-        Array.forEach( this._nodeBag.followers, function (node) { that.needRender |= node.tick(t); } );
+        for (i=0; i < this._nodeBag.followers.length; i++) { this.needRender |= this._nodeBag.followers[i].tick(t); }
+//        Array.forEach( this._nodeBag.followers, function (node) { that.needRender |= node.tick(t); } );
     }
     // just a temporary tricker solution to update the CSS-trans
     if (this._nodeBag.trans.length) {
         that = this;
-        Array.forEach( this._nodeBag.trans, function (node) { that.needRender |= node.tick(t); } );
+        for (i=0; i < this._nodeBag.trans.length; i++) { this.needRender |= this._nodeBag.trans[i].tick(t); }
+//        Array.forEach( this._nodeBag.trans, function (node) { that.needRender |= node.tick(t); } );
     }
     if (this._nodeBag.viewarea.length) {
         that = this;
-        Array.forEach( this._nodeBag.viewarea, function (node) { that.needRender |= node.tick(t); } );
+        for (i=0; i < this._nodeBag.viewarea.length; i++) { this.needRender |= this._nodeBag.viewarea[i].tick(t); }
+//        Array.forEach( this._nodeBag.viewarea, function (node) { that.needRender |= node.tick(t); } );
     }
 };
 
@@ -286,7 +291,7 @@ x3dom.X3DDocument.prototype.onKeyUp = function(keyCode)
 
     switch (keyCode) {
         case 27: /* ESC */
-            history.back(); // emulate good old ESC key
+            window.history.back(); // emulate good old ESC key
             break;
         case 33: /* page up */
                 stack = this._scene.getViewpoint()._stack;

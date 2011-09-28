@@ -18,7 +18,8 @@ x3dom.gfx_webgl = (function () {
         this.canvas = canvas;
         this.name = name;
         this.cached_shader_programs = {};
-        this.cached_shaders = {};   
+        this.cached_shaders = {};
+		this.imageLoadManager = new x3dom.ImageLoadManager();
     }
 
     Context.prototype.getName = function() {
@@ -231,7 +232,7 @@ x3dom.gfx_webgl = (function () {
         "}"
         };
     
-    /*g_shaders['vs-x3d-pick'] = { type: "vertex", data:
+    g_shaders['vs-x3d-pick'] = { type: "vertex", data:
         "attribute vec3 position;" +
         "uniform mat4 modelMatrix;" +
         "uniform mat4 modelViewProjectionMatrix;" +
@@ -247,9 +248,9 @@ x3dom.gfx_webgl = (function () {
         "    worldCoord.z /= dia.z;" +
         "    gl_Position = modelViewProjectionMatrix * vec4(position, 1.0);" +
         "}"
-        };*/
+        };
 		
-	g_shaders['vs-x3d-pick'] = { type: "vertex", data:
+	g_shaders['vs-x3d-pickIG'] = { type: "vertex", data:
         "attribute vec3 position;" +
         "uniform mat4 modelMatrix;" +
         "uniform mat4 modelViewProjectionMatrix;" +
@@ -1068,13 +1069,16 @@ x3dom.gfx_webgl = (function () {
             shape._webgl.lightsAndShadow = useLightingFunc(viewarea);
             
             var needFullReInit = (shape._webgl.lightsAndShadow[0] != oldLightsAndShadow[0] || 
-                                  shape._webgl.lightsAndShadow[1] != oldLightsAndShadow[1]);
+                                  shape._webgl.lightsAndShadow[1] != oldLightsAndShadow[1] ||
+                                  shape._dirty.shader);
 
             // TODO; do same for texcoords etc.!
-            if (shape._dirty.colors === true && shape._webgl.shader.color === undefined)
+            if (shape._dirty.colors === true &&
+                shape._webgl.shader.color === undefined &&
+                shape._cf.geometry.node._mesh._colors[0].length)
             {
                 // required since otherwise shape._webgl.shader.color stays undefined
-                // and thus the wrong shader will be chosen
+                // and thus the wrong shader will be chosen although there are colors
                 needFullReInit = true;
             }
                     
@@ -1366,10 +1370,10 @@ x3dom.gfx_webgl = (function () {
             // if (u > 1) { u = 1; }
             
             // prevent distortion
-            v0 = 1;
-            u0 = 0;
-            u = 1;
-            v = 0;
+            var v0 = 1;
+            var u0 = 0;
+            var u = 1;
+            var v = 0;
 
 //            x3dom.debug.logInfo(txtW + ", " + txtH + "; " + u0 + ", " + v0 + "; " + u + ", " + v);
 
@@ -1573,8 +1577,13 @@ x3dom.gfx_webgl = (function () {
                     texture = gl.createTexture();
                     
                     var image = new Image();
-                    image.src = tex._nameSpace.getURL(tex._vf.url[0]);
-                    that._nameSpace.doc.downloadCount += 1;
+					context.imageLoadManager.push(tex._vf.priority, image, tex._nameSpace.getURL(tex._vf.url[0]));
+					
+					//Old Loading
+					//image.crossOrigin = '';
+                    //image.src = tex._nameSpace.getURL(tex._vf.url[0]);
+					
+                    that._nameSpace.doc.downloadCount += 1;					
 
                     image.onload = function()
                     {           
@@ -1584,6 +1593,9 @@ x3dom.gfx_webgl = (function () {
                         
                         that._nameSpace.doc.needRender = true;
                         that._nameSpace.doc.downloadCount -= 1;
+						
+						context.imageLoadManager.activeDownloads--; 
+						context.imageLoadManager.load();
                         
 						that._webgl.texture[unit] = texture;
 						
@@ -1627,6 +1639,10 @@ x3dom.gfx_webgl = (function () {
 				numCoordinateTextures = shape._cf.geometry.node.numCoordinateTextures();
 				indexed = (shape._cf.geometry.node.getIndexTexture() != null) ? 1.0 : 0.0;
 			}
+			
+			
+			//Need for right picking shader
+			viewarea._scene._webgl.imageGeometry = numCoordinateTextures;
             
             shape._webgl = {
                 positions: shape._cf.geometry.node._mesh._positions,
@@ -1678,14 +1694,14 @@ x3dom.gfx_webgl = (function () {
 			}
             
             
-            if (x3dom.isa(shape._cf.geometry.node, x3dom.nodeTypes.PointSet)) {
+            if (x3dom.isa(shape._cf.geometry.node, x3dom.nodeTypes.PointSet) || 
+				x3dom.isa(shape._cf.geometry.node, x3dom.nodeTypes.Polypoint2D)) {
                 shape._webgl.primType = gl.POINTS;
                 
                 //TODO; remove these hacky thousands of shaders!!!
                 if (shape._webgl.colors[0].length) {
                     shape._webgl.shader = this.getShaderProgram(gl, 
-                                          ['vs-x3d-vertexcolorUnlit', 'fs-x3d-vertexcolorUnlit']);
-                    
+                                          ['vs-x3d-vertexcolorUnlit', 'fs-x3d-vertexcolorUnlit']);    
                 }
                 else {
                     shape._webgl.shader = this.getShaderProgram(gl, 
@@ -1693,7 +1709,9 @@ x3dom.gfx_webgl = (function () {
                 }
             }
             else if ( (x3dom.isa(shape._cf.geometry.node, x3dom.nodeTypes.IndexedLineSet)) ||
-					  (x3dom.isa(shape._cf.geometry.node, x3dom.nodeTypes.Circle2D)) )
+					  (x3dom.isa(shape._cf.geometry.node, x3dom.nodeTypes.Circle2D)) ||
+					  (x3dom.isa(shape._cf.geometry.node, x3dom.nodeTypes.Arc2D)) || 
+					  (x3dom.isa(shape._cf.geometry.node, x3dom.nodeTypes.Polyline2D)))
 			{
                 shape._webgl.primType = gl.LINES;
                 
@@ -1752,46 +1770,53 @@ x3dom.gfx_webgl = (function () {
                         
                     }else{
                         //FIXME; HACK
-                        g_shaders['vs-x3d-HACK'] = {};
-                        g_shaders['vs-x3d-HACK'].type = "vertex";
-                        g_shaders['vs-x3d-HACK'].data = shape._cf.appearance.node._shader._vertex._vf.url[0];
-                        g_shaders['fs-x3d-HACK'] = {};
-                        g_shaders['fs-x3d-HACK'].type = "fragment";
-                        g_shaders['fs-x3d-HACK'].data = shape._cf.appearance.node._shader._fragment._vf.url[0];
+                        var hackID = 'HACK'+shape._objectID;
+                        g_shaders['vs-x3d-'+hackID] = {};
+                        g_shaders['vs-x3d-'+hackID].type = "vertex";
+                        g_shaders['vs-x3d-'+hackID].data = shape._cf.appearance.node._shader._vertex._vf.url[0];
+                        g_shaders['fs-x3d-'+hackID] = {};
+                        g_shaders['fs-x3d-'+hackID].type = "fragment";
+                        g_shaders['fs-x3d-'+hackID].data = shape._cf.appearance.node._shader._fragment._vf.url[0];
                     
-                        shape._webgl.shader = getDefaultShaderProgram(gl, 'HACK');
+                        shape._webgl.shader = getDefaultShaderProgram(gl, hackID);
+						shape._dirty.shader = false;
                         //END OF HACK
                     }
                 }
                 else {
-                /** BEGIN STANDARD MATERIAL */
-                if (tex) {
-                    if (shape._cf.appearance.node._cf.textureTransform.node === null) {
-                        vsID = this.generateVS(viewarea, false, true, false, false, shape._webgl.lightsAndShadow, shape._webgl.imageGeometry, shape._webgl.indexedImageGeometry);
-                        fsID = this.generateFS(viewarea, false, true, false, shape._webgl.lightsAndShadow);
-                        shape._webgl.shader = this.getShaderProgram(gl, [vsID, fsID]);
-                    } else {
-                        vsID = this.generateVS(viewarea, false, true, true, false, shape._webgl.lightsAndShadow, shape._webgl.imageGeometry, shape._webgl.indexedImageGeometry);
-                        fsID = this.generateFS(viewarea, false, true, false, shape._webgl.lightsAndShadow);
-                        shape._webgl.shader = this.getShaderProgram(gl, [vsID, fsID]);
-                    }
-                } else if (shape._cf.geometry.node._mesh._colors[0].length > 0 || shape._cf.geometry.node.getColorTexture()) {
-                    
-                    var numColComponents = shape._cf.geometry.node._mesh._numColComponents;
-                
-                    vsID = this.generateVS(viewarea, numColComponents, false, false, false, shape._webgl.lightsAndShadow, shape._webgl.imageGeometry, shape._webgl.indexedImageGeometry);
-                    fsID = this.generateFS(viewarea, numColComponents, false, false, shape._webgl.lightsAndShadow);
-                    shape._webgl.shader = this.getShaderProgram(gl, [vsID, fsID]);
-                } else {
-                    vsID = this.generateVS(viewarea, false, false, false, false, shape._webgl.lightsAndShadow, shape._webgl.imageGeometry, shape._webgl.indexedImageGeometry);
-                    fsID = this.generateFS(viewarea, false, false, false, shape._webgl.lightsAndShadow);
-                    shape._webgl.shader = this.getShaderProgram(gl, [vsID, fsID]);
-                }
-                /** END STANDARD MATERIAL */
+					/** BEGIN STANDARD MATERIAL */
+					if (tex) {
+						if (shape._cf.appearance.node._cf.textureTransform.node === null) {
+							vsID = this.generateVS(viewarea, false, true, false, false, shape._webgl.lightsAndShadow, shape._webgl.imageGeometry, shape._webgl.indexedImageGeometry);
+							fsID = this.generateFS(viewarea, false, true, false, shape._webgl.lightsAndShadow);
+							shape._webgl.shader = this.getShaderProgram(gl, [vsID, fsID]);
+						} else {
+							vsID = this.generateVS(viewarea, false, true, true, false, shape._webgl.lightsAndShadow, shape._webgl.imageGeometry, shape._webgl.indexedImageGeometry);
+							fsID = this.generateFS(viewarea, false, true, false, shape._webgl.lightsAndShadow);
+							shape._webgl.shader = this.getShaderProgram(gl, [vsID, fsID]);
+						}
+					} else if (shape._cf.geometry.node._mesh._colors[0].length > 0 || shape._cf.geometry.node.getColorTexture()) {
+						
+						var numColComponents = shape._cf.geometry.node._mesh._numColComponents;
+					
+						vsID = this.generateVS(viewarea, numColComponents, false, false, false, shape._webgl.lightsAndShadow, shape._webgl.imageGeometry, shape._webgl.indexedImageGeometry);
+						fsID = this.generateFS(viewarea, numColComponents, false, false, shape._webgl.lightsAndShadow);
+						shape._webgl.shader = this.getShaderProgram(gl, [vsID, fsID]);
+					} else {
+						vsID = this.generateVS(viewarea, false, false, false, false, shape._webgl.lightsAndShadow, shape._webgl.imageGeometry, shape._webgl.indexedImageGeometry);
+						fsID = this.generateFS(viewarea, false, false, false, shape._webgl.lightsAndShadow);
+						shape._webgl.shader = this.getShaderProgram(gl, [vsID, fsID]);
+					}
+					/** END STANDARD MATERIAL */
                 }
             }
         }
-        
+		
+		
+		//TODO find right place
+        shape._dirty.shader = false;
+		
+		
         var sp = shape._webgl.shader;
         
         shape._webgl.buffers = [];
@@ -2485,7 +2510,12 @@ x3dom.gfx_webgl = (function () {
         
         var sp;
         if (pickMode === 0)
-            { sp = scene._webgl.pickShader; }
+		{
+			if(scene._webgl.imageGeometry)
+				{ sp = scene._webgl.pickShaderIG; }
+			else
+				{ sp = scene._webgl.pickShader; }
+		}
         else if (pickMode === 1)
             { sp = scene._webgl.pickColorShader; }
         else if (pickMode === 2)
@@ -3313,6 +3343,7 @@ x3dom.gfx_webgl = (function () {
             scene._webgl.fboPick.pixelData = null;
             
             scene._webgl.pickShader = getDefaultShaderProgram(gl, 'pick');
+			scene._webgl.pickShaderIG = this.getShaderProgram(gl, ['vs-x3d-pickIG', 'fs-x3d-pick']); 
             scene._webgl.pickColorShader = getDefaultShaderProgram(gl, 'vertexcolorUnlit');
             scene._webgl.pickTexCoordShader = getDefaultShaderProgram(gl, 'texcoordUnlit');
             

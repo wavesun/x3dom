@@ -47,7 +47,7 @@ x3dom.registerNodeType(
                 return null;
             },
 
-			getColorTextureURL: function() {
+            getColorTextureURL: function() {
                 return null;
             }
         }
@@ -66,13 +66,11 @@ x3dom.registerNodeType(
             this.addField_MFInt32(ctx, 'index', []);
 
             this.addField_MFNode('vertexAttributes', x3dom.nodeTypes.X3DVertexAttributeNode);
-
-            this._mesh = new x3dom.Mesh(this);
         },
         {
             nodeChanged: function()
             {
-                //var time0 = new Date().getTime();
+                var time0 = new Date().getTime();
 
                 var i, n = this._cf.vertexAttributes.nodes.length;
 
@@ -109,8 +107,8 @@ x3dom.registerNodeType(
                 this._mesh._numFaces = this._mesh._indices[0].length / 3;
                 this._mesh._numCoords = this._mesh._positions[0].length / 3;
 
-                //var time1 = new Date().getTime() - time0;
-                //x3dom.debug.logInfo("Mesh load time: " + time1 + " ms");
+                var time1 = new Date().getTime() - time0;
+                x3dom.debug.logWarning("Mesh load time: " + time1 + " ms");
             }
         }
     )
@@ -290,7 +288,7 @@ x3dom.registerNodeType(
             this.addField_SFBool(ctx, 'colorPerVertex', true);  // TODO
 
             this.addField_MFNode('attrib', x3dom.nodeTypes.X3DVertexAttributeNode);
-            this.addField_SFNode('coord', x3dom.nodeTypes.Coordinate);
+            this.addField_SFNode('coord', x3dom.nodeTypes.X3DCoordinateNode);
             this.addField_SFNode('color', x3dom.nodeTypes.X3DColorNode);
 
             this.addField_MFInt32(ctx, 'coordIndex', []);
@@ -322,7 +320,8 @@ x3dom.registerNodeType(
 
                 var coordNode = this._cf.coord.node;
                 x3dom.debug.assert(coordNode);
-                positions = coordNode._vf.point;
+                
+                positions = coordNode.getPoints();
 
                 var numColComponents = 3;
                 var colorNode = this._cf.color.node;

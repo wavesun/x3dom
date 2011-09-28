@@ -5,12 +5,13 @@ import os, sys,shutil,re
 
 mydir = sys.argv[1]
 
-// DRY: build this from ../build.py:files
+# DRY: build this from ../build.py:files
 x3dom_includes = '''
 <link rel="stylesheet" type="text/css" href="../../src/x3dom.css" />
 <script type="text/javascript" src="../../src/lang/Array.js"></script>
 <script type="text/javascript" src="../../src/Internals.js"></script>
 <script type="text/javascript" src="../../src/debug.js"></script>
+<script type="text/javascript" src="../../src/ImageLoadManager.js"></script>
 <script type="text/javascript" src="../../src/lang/Properties.js"></script>
 <script type="text/javascript" src="../../src/X3DCanvas.js"></script>
 <script type="text/javascript" src="../../src/Runtime.js"></script>
@@ -40,6 +41,7 @@ x3dom_includes = '''
 <script type="text/javascript" src="../../src/nodes/Texturing.js"></script>
 <script type="text/javascript" src="../../src/nodes/Shaders.js"></script>
 <script type="text/javascript" src="../../src/nodes/Geometry3D.js"></script>
+<script type="text/javascript" src="../../src/nodes/Geometry2D.js"></script>
 <script type="text/javascript" src="../../src/nodes/Geospatial.js"></script>
 '''
 

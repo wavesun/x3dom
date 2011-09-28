@@ -19,7 +19,8 @@ COMPILER = ${JS_ENGINE} ${TOOL_DIR}/uglify.js --unsafe
 BASE_FILES = \
 	${SRC_DIR}/lang/Array.js\
 	${SRC_DIR}/Internals.js\
-	${SRC_DIR}/debug.js\
+    ${SRC_DIR}/debug.js\
+    ${SRC_DIR}/ImageLoadManager.js\
 	${SRC_DIR}/lang/Properties.js\
     ${SRC_DIR}/X3DCanvas.js\
     ${SRC_DIR}/Runtime.js\
@@ -50,9 +51,17 @@ BASE_FILES = \
 	${SRC_DIR}/nodes/Texturing.js\
     ${SRC_DIR}/nodes/Shaders.js\
     ${SRC_DIR}/nodes/Geometry3D.js\
-    ${SRC_DIR}/nodes/Geospatial.js
+    ${SRC_DIR}/nodes/Geospatial.js\
+
+COMPONENTS = \
+    ${SRC_DIR}/nodes/Geometry2D.js\
+    ${SRC_DIR}/nodes/VolumeRendering.js
 
 MODULES = ${BASE_FILES}
+
+FULL = ${MODULES}\
+    ${COMPONENTS}
+
 
 X3DOM = ${DIST_DIR}/x3dom.js
 X3DOM_MIN = ${DIST_DIR}/x3dom.min.js
@@ -98,12 +107,11 @@ x3dom: init ${X3DOM}
 release: x3dom changelog
 
 
-${X3DOM}: ${MODULES} | ${DIST_DIR}
+${X3DOM}: ${FULL} | ${DIST_DIR}
 	@@echo "Building" ${X3DOM}
-	@@cat ${MODULES} | \
+	@@cat ${FULL} | \
 	sed 's/@DATE/'"${DATE}"'/' | \
 	${VER} > ${X3DOM};
-
 
 lint: x3dom
 	@@if test ! -z ${JS_ENGINE}; then \
