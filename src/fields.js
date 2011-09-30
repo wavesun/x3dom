@@ -819,6 +819,162 @@ x3dom.fields.SFVec2f.prototype.setValueByStr = function(str) {
 };
 
 
+///////////////////////////////////////////////////////////////////////////////
+
+/** SFVec3f constructor.
+    @class Represents a SFVec3f
+  */
+x3dom.SFVec3f = function()
+{
+  // empty
+  if(arguments.length == 0)
+    this._array = new math.Float32Array(3);
+  
+  else if(arguments.length == 1)
+  {
+    // view or typed array
+    if(arguments[0] instanceof math.Float32Array)
+      this._array = arguments[0];
+    
+    // simple array
+    else if(arguments[0] instanceof Array)
+      this._array = new math.Float32Array(arguments[0]);
+  }
+  
+  // single values
+  else
+  {
+    this._array = new math.Float32Array(3);
+    
+    for(var i=0; i<3; ++i)
+      this._array[i] = arguments[i];
+  }
+};
+
+x3dom.SFVec3f.prototype = 
+{
+  toString : function()
+  {
+    return "[" + this._array[0] + " " + this._array[1] + " " + this._array[2] + "]";
+  }
+};
+
+/** MFVec3f constructor.
+    @class Represents a MFVec3f
+  */
+x3dom.MFVec3f = function()
+{
+  // empty
+  if(arguments.length == 0)
+    this._array = null;
+  
+  else if(arguments.length == 1)
+  {
+    // view or typed array
+    if(arguments[0] instanceof math.Float32Array)
+      this._array = arguments[0];
+    
+    // simple array
+    else if(arguments[0] instanceof Array)
+      this._array = new math.Float32Array(arguments[0]);
+  }
+  
+  // single values
+  else
+  {
+    var elements = arguments.length + (arguments.length % 3);
+    
+    this._array = new math.Float32Array(elements);
+    
+    for(var i=0; i<arguments.length; ++i)
+      this._array[i] = arguments[i];
+  }
+  
+  this.length = this._array.length / 3;
+};
+
+x3dom.MFVec3f.prototype = 
+{
+  toString : function()
+  {
+    var temp = "";
+    
+    for(var i=0; i<this.length; ++i)
+      temp += "[" + this._array[i*3] + " " + this._array[i*3+1] + " " + this._array[i*3+2] + "] ";
+      
+    return temp;
+  },
+  
+  get : function(index)
+  {
+    return new x3dom.SFVec3f(this._array.subarray(index*3, (index+1)*3));
+  },
+  
+  push : function(value)
+  {
+    if((value instanceof Array) || (value instanceof math.Float32Array))
+      var source = value;
+    else if((value instanceof x3dom.SFVec3f) || (value instanceof x3dom.MFVec3f))
+      var source = value._array;
+
+    var source_length = source.length + (source.length % 3);
+    var temp = new math.Float32Array(this._array.length + source_length);
+    
+    temp.set(this._array);
+    temp.set(source, this._array.length);
+    
+    this._array = temp;
+    this.length += source_length / 3;
+  },
+  
+  pop : function()
+  {
+    var pos = this._array.length - 3;
+    
+    var temp = new x3dom.SFVec3f(
+      this._array[pos],
+      this._array[pos+1],
+      this._array[pos+2]);
+      
+    this._array = this._array.subarray(0, pos);
+    this.length--;
+      
+    return temp;
+  },
+  
+  shift : function()
+  {
+    var temp = new x3dom.SFVec3f(
+      this._array[0],
+      this._array[1],
+      this._array[2]);
+      
+    this._array = this._array.subarray(3, this._array.length);
+    this.length--;
+      
+    return temp;
+  },
+  
+  unshift : function(value)
+  {
+    if((value instanceof Array) || (value instanceof math.Float32Array))
+      var source = value;
+    else if((value instanceof x3dom.SFVec3f) || (value instanceof x3dom.MFVec3f))
+      var source = value._array;
+
+    var source_length = source.length + (source.length % 3);
+    var temp = new math.Float32Array(this._array.length + source_length);
+    
+    temp.set(source);
+    temp.set(this._array, source_length);
+    
+    this._array = temp;
+    this.length += source_length / 3;
+  }
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
 /** SFVec3f constructor.
     @class Represents a SFVec3f
   */

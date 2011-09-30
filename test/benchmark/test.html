@@ -10,29 +10,16 @@
 
 <script>
 
-SFVec3f = function()
-{
-  this.value = math.vec3.create(arguments);
-};
-
-
-function MFVec3f()
-{
-  this.length = arguments.length;
-
-  this._data = new math.Float32Array(arguments.length * 3);
-  
-  for(var i=0; i<arguments.length; ++i)
-    for(var j=0; j<3; ++j)
-      this._data[(i*3)+j] = arguments[i][j];
-};
-
 // Edition 5.1 (June 2011)
 // http://www.ecma-international.org/publications/files/ECMA-ST/Ecma-262.pdf
 
 // Mozilla
 // https://developer.mozilla.org/en/JavaScript/Reference/Global_Objects/Array
 
+// TypedArrays
+// http://www.khronos.org/registry/typedarray/specs/latest
+
+/*
 MFVec3f.prototype = 
 {
   construction : function() { console.log("construction"); },
@@ -62,25 +49,88 @@ MFVec3f.prototype =
   reduce : function() { console.log("reduce"); },
   reduceRight : function() { console.log("reduceRight"); }
 };
-
+*/
   
 function init()
 {
-  var f2 = new Array();
-  console.log(f2);
-
-  var f1 = new MFVec3f([1,2,3],[4,5,6]);
+  var m1 = new x3dom.MFVec3f([1,2,3]);
+  var s1 = new x3dom.SFVec3f(4,5,6);
   
-  f1[0] = 0;
-  console.log(f1.length);
+  console.log(m1.toString());
+  console.log(s1.toString());
   
-  f1.push(1);
-  console.log(f1.length);
+  m1.push(s1);
   
-  console.log(f1);
-  
-  console.log(f1._data);
+  console.log(m1.toString());
+  m1.unshift([7,8,9]);
+  console.log(m1.toString());
+  m1.shift();
+  console.log(m1.toString());
 };
+
+/*
+  unwire : function()
+  {
+    if(arguments.length > 0)
+    {
+      // view or typed array
+      if(arguments[0] instanceof math.Float32Array)
+        var _array = arguments[0];
+      
+      else
+      {
+        // count elements
+        var counter = function(arguments)
+        {
+          var elements = 0;
+          
+          for(var i=0; i<arguments.length; ++i)
+          {
+            if(arguments[i] instanceof math.Float32Array)
+              elements += arguments[i].length;
+              
+            else if(arguments[i] instanceof Array)
+              elements += counter(arguments[i]);
+              
+            else if(!(arguments[i] instanceof Object))
+              elements += 1;
+          }
+          
+          return elements;
+        };
+        
+        // copy elements to buffer
+        var merger = function(arguments, destination, offset)
+        {
+          for(var i=0; i<arguments.length; ++i)
+          {
+            if(arguments[i] instanceof math.Float32Array)
+            {
+              for(var j=0; j<arguments[i].length; ++j)
+                destination[offset + j] = arguments[i][j];
+                
+              offset += arguments[i].length;
+            }
+            else if(arguments[i] instanceof Array)
+              merger(arguments[i], destination, offset);
+            else if(!(arguments[i] instanceof Object))
+            {
+              destination[offset] = arguments[i];
+              offset++;
+            }
+          }
+          return elements;
+        };
+        
+        // count elements & merge to buffer
+        var _array = new math.Float32Array(counter(arguments));
+        merger(arguments, _array, 0);
+      }
+    }
+    
+    return _array;
+  }
+*/
 
 </script>
 </head>
