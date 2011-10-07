@@ -826,29 +826,13 @@ x3dom.fields.SFVec2f.prototype.setValueByStr = function(str) {
   */
 x3dom.SFVec3f = function()
 {
-  // empty
-  if(arguments.length == 0)
-    this._array = new math.Float32Array(3);
+  // view or typed array
+  if(arguments[0] instanceof math.Float32Array)
+    this._array = arguments[0];
   
-  else if(arguments.length == 1)
-  {
-    // view or typed array
-    if(arguments[0] instanceof math.Float32Array)
-      this._array = arguments[0];
-    
-    // simple array
-    else if(arguments[0] instanceof Array)
-      this._array = new math.Float32Array(arguments[0]);
-  }
-  
-  // single values
+  // init
   else
-  {
-    this._array = new math.Float32Array(3);
-    
-    for(var i=0; i<3; ++i)
-      this._array[i] = arguments[i];
-  }
+    this._array = math.vec3.create(arguments);
 };
 
 x3dom.SFVec3f.prototype = 
@@ -856,7 +840,19 @@ x3dom.SFVec3f.prototype =
   toString : function()
   {
     return "[" + this._array[0] + " " + this._array[1] + " " + this._array[2] + "]";
-  }
+  },
+  
+  negate : function() { math.vec3.negate(this._array); },
+  add : function(right, result) { math.vec3.add(this._array, right._array, result._array); },
+  subtract : function(right, result) { math.vec3.subtract(this._array, right._array, result._array); },
+  dot : function(right) { return math.vec3.dot(this._array, right._array); },
+  cross : function(right, result) { math.vec3.cross(this._array, right._array, result._array); },
+//  reflect = function (n)
+  length : function() { return math.vec3.length(this._array); },
+  normalize : function() { math.vec3.normalize(this._array); },
+//  multComponents = function (that)
+//  multiply = function (n)
+//  divide = function (n)
 };
 
 /** MFVec3f constructor.
@@ -866,31 +862,37 @@ x3dom.MFVec3f = function()
 {
   // empty
   if(arguments.length == 0)
-    this._array = null;
-  
-  else if(arguments.length == 1)
   {
-    // view or typed array
-    if(arguments[0] instanceof math.Float32Array)
-      this._array = arguments[0];
-    
-    // simple array
-    else if(arguments[0] instanceof Array)
-      this._array = new math.Float32Array(arguments[0]);
+    this._array = null;
+    this.length = 0;
   }
   
-  // single values
+  // create array
   else
   {
-    var elements = arguments.length + (arguments.length % 3);
+    // single value
+    if(arguments.length == 1)
+    {
+      // reference of a typed array
+      if(arguments[0] instanceof math.Float32Array)
+        this._array = arguments[0];
+      
+      // simple array or size
+      else
+        this._array = new math.Float32Array(arguments[0]);
+    }
     
-    this._array = new math.Float32Array(elements);
+    // multiple values
+    else
+    {
+      this._array = new math.Float32Array(arguments.length);
+      
+      for(var i=0; i<arguments.length; ++i)
+        this._array[i] = arguments[i];
+    }
     
-    for(var i=0; i<arguments.length; ++i)
-      this._array[i] = arguments[i];
+    this.length = this._array.length / 3;
   }
-  
-  this.length = this._array.length / 3;
 };
 
 x3dom.MFVec3f.prototype = 

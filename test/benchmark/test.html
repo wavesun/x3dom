@@ -5,8 +5,8 @@
 <title>Math Test</title>
 
 <script src="../../src/Internals.js"></script>
-<script src="../../src/fields.js"></script>
 <script src="../../src/lang/Math.js"></script>
+<script src="../../src/fields.js"></script>
 
 <script>
 
@@ -53,19 +53,26 @@ MFVec3f.prototype =
   
 function init()
 {
-  var m1 = new x3dom.MFVec3f([1,2,3]);
-  var s1 = new x3dom.SFVec3f(4,5,6);
-  
-  console.log(m1.toString());
+  var s1 = new x3dom.SFVec3f(4,5,6);  
   console.log(s1.toString());
   
-  m1.push(s1);
+  var s2 = new x3dom.SFVec3f(7,8,9);  
+  console.log(s1.toString());
+
+  var m1 = new x3dom.MFVec3f([1,2,3]);
+  console.log(m1.toString());
   
+  var m2 = new x3dom.MFVec3f(4);
+  console.log(m2.toString());
+  
+  m1.push(s1);
   console.log(m1.toString());
   m1.unshift([7,8,9]);
   console.log(m1.toString());
   m1.shift();
   console.log(m1.toString());
+
+  console.log(s1.dot(s2));
 };
 
 /*

@@ -30,15 +30,15 @@ math.vec2 =
   {
     var vec = new math.Float32Array(2);
     
-    if(arguments.length)
+    if(arg.length)
     {
-      if(typeof arguments[0] == "object")
+      if(arg[0] instanceof Array)
         for(var i=0; i<2; ++i)
-          vec[i] = arguments[0][i];
+          vec[i] = arg[0][i];
           
       else
         for(var i=0; i<2; ++i)
-          vec[i] = arguments[i];
+          vec[i] = arg[i];
     }
     
     return vec;
@@ -95,19 +95,19 @@ math.vec2 =
 /** The Vector[3] */
 math.vec3 = 
 {
-  create : function()
+  create : function(arg)
   {
     var vec = new math.Float32Array(3);
     
-    if(arguments.length)
+    if(arg.length)
     {
-      if(typeof arguments[0] == "object")
+      if(arg[0] instanceof Array)
         for(var i=0; i<3; ++i)
-          vec[i] = arguments[0][i];
+          vec[i] = arg[0][i];
           
       else
         for(var i=0; i<3; ++i)
-          vec[i] = arguments[i];
+          vec[i] = arg[i];
     }
     
     return vec;
@@ -188,15 +188,15 @@ math.vec4 =
   {
     var vec = new math.Float32Array(4);
     
-    if(arguments.length)
+    if(arg.length)
     {
-      if(typeof arguments[0] == "object")
+      if(arg[0] instanceof Array)
         for(var i=0; i<4; ++i)
-          vec[i] = arguments[0][i];
+          vec[i] = arg[0][i];
           
       else
         for(var i=0; i<4; ++i)
-          vec[i] = arguments[i];
+          vec[i] = arg[i];
     }
     
     return vec;
@@ -279,15 +279,15 @@ math.mat4x4 =
   {
     var mat = new math.Float32Array(16);
     
-    if(arguments.length)
+    if(arg.length)
     {
-      if(typeof arguments[0] == "object")
+      if(arg[0] instanceof Array)
         for(var i=0; i<16; ++i)
-          mat[i] = arguments[0][i];
+          mat[i] = arg[0][i];
           
       else
         for(var i=0; i<16; ++i)
-          mat[i] = arguments[i];
+          mat[i] = arg[i];
     }
     
     else
@@ -586,15 +586,15 @@ math.quat =
   {
     var quat = new math.Float32Array(3);
     
-    if(arguments.length)
+    if(arg.length)
     {
-      if(typeof arguments[0] == "object")
+      if(arg[0] instanceof Array)
         for(var i=0; i<4; ++i)
-          quat[i] = arguments[0][i];
+          quat[i] = arg[0][i];
           
       else
         for(var i=0; i<4; ++i)
-          quat[i] = arguments[i];
+          quat[i] = arg[i];
     }
     
     return quat;
