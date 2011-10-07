@@ -1587,15 +1587,15 @@ x3dom.gfx_webgl = (function () {
 
                     image.onload = function()
                     {           
+						context.imageLoadManager.activeDownloads--; 
+						context.imageLoadManager.load();
+						
+						that._nameSpace.doc.needRender = true;
+                        that._nameSpace.doc.downloadCount -= 1;
+						
                         if(tex._vf.scale){
                             image = scaleImage(image);
                         }
-                        
-                        that._nameSpace.doc.needRender = true;
-                        that._nameSpace.doc.downloadCount -= 1;
-						
-						context.imageLoadManager.activeDownloads--; 
-						context.imageLoadManager.load();
                         
 						that._webgl.texture[unit] = texture;
 						
@@ -1667,28 +1667,33 @@ x3dom.gfx_webgl = (function () {
 				
 				var indexTexture = shape._cf.geometry.node.getIndexTexture();
 				if(indexTexture) {
+					indexTexture._vf.priority = 0;
 					shape.updateTexture(indexTexture, GI_texUnit++, 'index');
 				}
 				
 				for(var i=0; i<numCoordinateTextures; i++) {
 					var coordinateTexture = shape._cf.geometry.node.getCoordinateTexture(i);
 					if(coordinateTexture) {
+						coordinateTexture._vf.priority = 0;
 						shape.updateTexture(coordinateTexture, GI_texUnit++, 'coord');
 					}
 				}
 							
 				var normalTexture = shape._cf.geometry.node.getNormalTexture(0);
 				if(normalTexture) {
+					normalTexture._vf.priority = 0;
 					shape.updateTexture(normalTexture, GI_texUnit++, "normal");
 				}
 				
 				var texCoordTexture = shape._cf.geometry.node.getTexCoordTexture();
 				if(texCoordTexture) {
+					texCoordTexture._vf.priority = 0;
 					shape.updateTexture(texCoordTexture, GI_texUnit++, "texCoord");
 				}
 				
 				var colorTexture = shape._cf.geometry.node.getColorTexture();
 				if(colorTexture) {
+					colorTexture._vf.priority = 0;
 					shape.updateTexture(colorTexture, GI_texUnit++, "color");
 				}
 			}
@@ -2867,8 +2872,11 @@ x3dom.gfx_webgl = (function () {
         /*var normalMatrix = mat_view.mult(transform);
         normalMatrix = mat_view.inverse().transpose();*/
         
+		
+		
         var model_view = mat_view.mult(transform);
-        
+		
+		sp.viewMatrix 	   = mat_view.toGL();		
         sp.modelViewMatrix = model_view.toGL();
         sp.normalMatrix    = model_view.inverse().transpose().toGL();
         
@@ -3530,7 +3538,7 @@ x3dom.gfx_webgl = (function () {
         //gl.enable(gl.SAMPLE_ALPHA_TO_COVERAGE);
         //gl.enable(gl.SAMPLE_COVERAGE);
         //gl.sampleCoverage(0.5, false);
-        
+
         //gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
         //Workaround for WebKit & Co.
         gl.blendFuncSeparate(
@@ -3548,15 +3556,31 @@ x3dom.gfx_webgl = (function () {
         for (i=0, n=zPos.length; i<n; i++)
         {
             var obj = scene.drawableObjects[zPos[i][0]];
+            var needEnableBlending = false;
+
+            // HACK; fully impl. BlendMode! (also DeopthMode)
+            if (obj[1]._cf.appearance.node._cf.blendMode.node &&
+                obj[1]._cf.appearance.node._cf.blendMode.node._vf.srcFactor.toLowerCase() === "none" &&
+                obj[1]._cf.appearance.node._cf.blendMode.node._vf.destFactor.toLowerCase() === "none")
+            {
+                needEnableBlending = true;
+                gl.disable(gl.BLEND);
+            }
+
             this.renderShape(obj[0], obj[1], viewarea, slights, numLights, 
                 mat_view, mat_scene, mat_light, gl, activeTex, oneShadowExistsAlready);
+
+            if (needEnableBlending) {
+                gl.enable(gl.BLEND);
+            }
         }
-        
+
         gl.disable(gl.BLEND);
         /*gl.blendFuncSeparate( // just multiply dest RGB by its A
             gl.ZERO, gl.DST_ALPHA,
             gl.ZERO, gl.ONE
-        );*/ 
+        );*/
+        
         gl.disable(gl.DEPTH_TEST);
         
         if (viewarea._visDbgBuf !== undefined && viewarea._visDbgBuf)
