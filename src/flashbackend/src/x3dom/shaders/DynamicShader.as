@@ -27,10 +27,10 @@ package x3dom.shaders
 		public function DynamicShader(shape:Shape, lights:Array)
 		{
 			//Get 3D Context
-			_context3D = FlashBackend.getContext();
+			this._context3D = FlashBackend.getContext();
 			
 			//Generate Program3D 
-			_program3D = _context3D.createProgram();
+			this._program3D = this._context3D.createProgram();
 			
 			//Generate vertex shader
 			var vertexShader:AGALMiniAssembler = generateVertexShader(shape, lights);
@@ -39,7 +39,7 @@ package x3dom.shaders
 			var fragmentShader:AGALMiniAssembler = generateFragmentShader(shape, lights);
 			
 			//Upload shaders to Program3D
-			program3D.upload( vertexShader.agalcode, fragmentShader.agalcode);
+			this._program3D.upload( vertexShader.agalcode, fragmentShader.agalcode);
 		}
 		
 		/**
@@ -174,8 +174,9 @@ package x3dom.shaders
 				}
 				
 				shader += "sat ft3, ft3\n";								//saturate(NdotL)
+				shader += "add ft3, fc3, ft3\n";						//rgb += emissiveColor
 				shader += "sub ft4, ft3, fc4\n";
-				shader += "kil ft4.xxxx\n";
+				shader += "kil ft4.wwww\n";
 				shader += "mov oc, ft3 \n";							//Output Color
 			} else {
 				if( shape.colorBuffer ) {
@@ -192,8 +193,9 @@ package x3dom.shaders
 				
 				shader += "mov ft1.w, fc1.w\n";
 				shader += "sat ft1, ft1\n";								//saturate(NdotL)
+				shader += "add ft1, fc3, ft1\n";						//rgb += emissiveColor
 				shader += "sub ft2, ft1, fc4\n";
-				shader += "kil ft2.xxxx\n";
+				shader += "kil ft2.wwww\n";
 				shader += "mov oc, ft1 \n";							//Output Color
 			}
 			
@@ -210,7 +212,7 @@ package x3dom.shaders
 		 */ 
 		public function get program3D() : Program3D
 		{
-			return _program3D;
+			return this._program3D;
 		}
 	}
 }

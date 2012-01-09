@@ -37,6 +37,9 @@ x3dom.components = {};
 /** Cache for primitive nodes (Box, Sphere, etc.) */
 x3dom.geoCache = [];
 
+/** Stores informations about Browser and Hardware capabilities */
+x3dom.caps = { PLATFORM: navigator.platform, AGENT: navigator.userAgent };
+
 /** Registers the node defined by @p nodeDef.
 
     The node is registered with the given @p nodeTypeName and @p componentName.
@@ -240,6 +243,13 @@ x3dom.loadJS = function(src, path_prefix, blocking) {
     }
 };
 
+function array_to_object(a) {
+      var o = {};
+      for(var i=0;i<a.length;i++) {
+        o[a[i]]='';
+      }
+      return o;
+    }
 /**
  * Provides requestAnimationFrame in a cross browser way.
  * https://cvs.khronos.org/svn/repos/registry/trunk/public/webgl/sdk/demos/common/webgl-utils.js
@@ -254,3 +264,5 @@ window.requestAnimFrame = (function() {
              window.setTimeout(callback, 1000/60);
            };
 })();
+
+

@@ -4,12 +4,15 @@
 	<meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
 	<title>Simple change material test</title>
     <!-- BEGIN:X3DOM -->
+<meta http-equiv="X-UA-Compatible" content="chrome=1" />
 <link rel="stylesheet" type="text/css" href="../../src/x3dom.css" />
 <script type="text/javascript" src="../../src/lang/Array.js"></script>
 <script type="text/javascript" src="../../src/Internals.js"></script>
 <script type="text/javascript" src="../../src/debug.js"></script>
 <script type="text/javascript" src="../../src/ImageLoadManager.js"></script>
 <script type="text/javascript" src="../../src/lang/Properties.js"></script>
+<script type="text/javascript" src="../../src/lang/DoublyLinkedList.js"></script>
+<script type="text/javascript" src="../../src/util/EarClipping.js"></script>
 <script type="text/javascript" src="../../src/X3DCanvas.js"></script>
 <script type="text/javascript" src="../../src/Runtime.js"></script>
 <script type="text/javascript" src="../../src/Main.js"></script>
@@ -38,8 +41,9 @@
 <script type="text/javascript" src="../../src/nodes/Texturing.js"></script>
 <script type="text/javascript" src="../../src/nodes/Shaders.js"></script>
 <script type="text/javascript" src="../../src/nodes/Geometry3D.js"></script>
-<script type="text/javascript" src="../../src/nodes/Geometry2D.js"></script>
 <script type="text/javascript" src="../../src/nodes/Geospatial.js"></script>
+<script type="text/javascript" src="../../src/nodes/Geometry2D.js"></script>
+<script type="text/javascript" src="../../src/nodes/VolumeRendering.js"></script>
 <!-- END:X3DOM -->
     <script type="text/javascript" src="media/js/tests.js"></script>
 </head>
@@ -52,7 +56,7 @@
 	<div class="group"> 
 		<X3D xmlns="http://www.web3d.org/specifications/x3d-namespace" id="boxes" showStat="true" showLog="false" x="0px" y="0px" width="400px" height="300px">
 			<Scene>
-				<Background DEF='bgnd' transparency="0" skyColor='0.2 0.7 0.4, 1 0 0, 0 1 0' />
+				<Background DEF='bgnd' transparency="0" skyColor='0.2 0.7 0.4'/>
 				
 				<Transform translation="0 0 0">
 					<Shape>
@@ -101,24 +105,25 @@
 	<script type="text/javascript">
 	<![CDATA[
 	
-	var solid = true;
+	var flag = true;
 	
 	function toggleRendering()
 	{
 		var button = document.getElementById("points");
 		
-		solid = !solid;
+		flag = !flag;
 		
-		if (solid)
+		if (flag)
 			button.value = "Blue";
 		else
 			button.value = "Red";
 		
 		var mat = document.getElementsByTagName("Material");
-		var i = 0, n = mat.length;
-		
 		var aMat = mat[0];
-		aMat.setAttribute("diffuseColor", (!solid ? "0 0 1" : "1 0 0"));
+		
+		//aMat.setAttribute("diffuseColor", (!flag ? "0 0 1" : "1 0 0"));
+		if (flag) aMat.diffuseColor = "1 0 0";
+		else aMat.diffuseColor = "0 0 1";
 		
 		return false;
 	}
@@ -130,6 +135,5 @@
 	<input type="button" id="points" value="Change Color" onclick="toggleRendering();" />
 	</div>
 	
-
 </body>
 </html>

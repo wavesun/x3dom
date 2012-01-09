@@ -54,7 +54,18 @@ of strange errors, please check the following lists for:
 Windows
 ~~~~~~~
 
-No specific notes yet.
+**Chrome Frame**
+
+Currently, the only way to use WebGL with Internet Explorer is by using the Google `Chrome Frame plugin <http://code.google.com/chrome/chromeframe/>`_. In order to make X3DOM use the WebGL renderer with Internet Explorer, you need to install Chrome Frame and enable it in your HTML or web browser configuration. The most simple way to enable ChromeFrame is to put this line in your HTML head section:
+
+.. code-block:: html
+
+    <meta http-equiv="X-UA-Compatible" content="chrome=1" />
+
+Download and furhter reading:
+
+    * `Chrome Frame <http://code.google.com/chrome/chromeframe/>`_
+    * `Getting started <http://www.chromium.org/developers/how-tos/chrome-frame-getting-started>`_
 
 
 Mac OS X
@@ -63,6 +74,18 @@ Mac OS X
 Safari 5.1+ is supporting WebGL, however you need to enable it in the Developer menu.
 This menu is invisible by default. Go to "Preferences" (Cmd-,) and select the
 "Advaned" tab. Enable the option "Show Develop menu in menu bar".
+
+**Rubber band scrolling in Mac OS X 10.7 Lion**
+
+On Mac OS Lion, with Apple input devices scrolling behaves differently. When reaching the end of a page, a rubber band effect kicks in. This behavior is also present on iOS devices.
+
+If you don't like the effect, you can turn if off using a CSS rule:
+
+.. code-block:: css
+
+    body { overflow: hidden }
+    
+Keep in mind that this rule changes the default behavior of your browser and scrollbars might disappear entirely. It is only a workaround and the preferred fix is to wait for Apple to provide a switch to turn this functionality off. Also note that the rubber band scrolling might not be visible at all with non Apple pointing devices.
 
 
 Ubuntu Linux

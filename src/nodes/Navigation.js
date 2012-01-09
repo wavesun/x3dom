@@ -38,8 +38,6 @@ x3dom.registerNodeType(
     )
 );
 
-
-
 /* ### Viewpoint ### */
 x3dom.registerNodeType(
     "Viewpoint",
@@ -55,23 +53,27 @@ x3dom.registerNodeType(
             this.addField_SFFloat(ctx, 'zNear', 0.1);
             this.addField_SFFloat(ctx, 'zFar', 100000);
 
-            this._viewMatrix = this._vf.orientation.toMatrix().transpose().
-                mult(x3dom.fields.SFMatrix4f.translation(this._vf.position.negate()));
+            //this._viewMatrix = this._vf.orientation.toMatrix().transpose().
+            //    mult(x3dom.fields.SFMatrix4f.translation(this._vf.position.negate()));
+            this._viewMatrix = x3dom.fields.SFMatrix4f.translation(this._vf.position).
+                mult(this._vf.orientation.toMatrix()).inverse();
+
             this._projMatrix = null;
             this._lastAspect = 1.0;
         },
         {
             fieldChanged: function (fieldName) {
-                if (fieldName == "position" || fieldName == "orientation") {
-                    this._viewMatrix = this._vf.orientation.toMatrix().transpose().
-                        mult(x3dom.fields.SFMatrix4f.translation(this._vf.position.negate()));
+                if (fieldName == "position" || 
+					fieldName == "orientation") {
+                    this.resetView();
                 }
                 else if (fieldName == "fieldOfView" ||
-                         fieldName == "zNear" || fieldName == "zFar") {
+                         fieldName == "zNear" || 
+						 fieldName == "zFar") {
                     this._projMatrix = null;   // only trigger refresh
                 }
                 else if (fieldName === "set_bind") {
-                    // XXX FIXME; call parent.fieldChanged();
+                    // FIXME; call parent.fieldChanged();
                     this.bind(this._vf.set_bind);
                 }
             },
@@ -106,8 +108,14 @@ x3dom.registerNodeType(
                 this._viewMatrix = mat.mult(newView);
             },
             resetView: function() {
-                this._viewMatrix = this._vf.orientation.toMatrix().transpose().
-                    mult(x3dom.fields.SFMatrix4f.translation(this._vf.position.negate()));
+                //this._viewMatrix = this._vf.orientation.toMatrix().transpose().
+                //    mult(x3dom.fields.SFMatrix4f.translation(this._vf.position.negate()));
+                this._viewMatrix = x3dom.fields.SFMatrix4f.translation(this._vf.position).
+                    mult(this._vf.orientation.toMatrix()).inverse();
+            },
+
+            getTransformation: function() {
+                return this.getCurrentTransform();
             },
 
             getProjectionMatrix: function(aspect)
@@ -161,7 +169,30 @@ x3dom.registerNodeType(
             x3dom.debug.logInfo("NavType: " + this._vf.type[0].toLowerCase());
         },
         {
-            // methods
+            fieldChanged: function(fieldName) {
+            },
+
+            getType: function() {
+                return this._vf.type[0].toLowerCase();
+            },
+
+            setType: function(type, viewarea) {
+                var navType = type.toLowerCase();
+                switch (navType) {
+                    case 'game':
+                        if (this._vf.type[0].toLowerCase() !== navType) {
+                            if (viewarea)
+                                viewarea.initMouseState();
+                            else
+                                this._nameSpace.doc._viewarea.initMouseState();
+                        }
+                        break;
+                    default:
+                        break;
+                }
+                this._vf.type[0] = navType;
+                x3dom.debug.logInfo("Switch to " + navType + " mode.");
+            }
         }
     )
 );
@@ -180,6 +211,8 @@ x3dom.registerNodeType(
 
             this._eye = new x3dom.fields.SFVec3f(0, 0, 0);
             this._eyeViewUp = new x3dom.fields.SFVec3f(0, 0, 0);
+            this._eyeLook = new x3dom.fields.SFVec3f(0,0,0);
+
             this._viewAlignedMat = x3dom.fields.SFMatrix4f.identity();
         },
         {
@@ -204,10 +237,17 @@ x3dom.registerNodeType(
                     rotMat = rot1.toMatrix().transpose();
 
                     var yAxis = rotMat.multMatrixPnt(new x3dom.fields.SFVec3f(0, 1, 0)).normalize();
+                    var zAxis = rotMat.multMatrixPnt(new x3dom.fields.SFVec3f(0, 0, 1)).normalize();
+
 
                     if(!this._eyeViewUp.equals(new x3dom.fields.SFVec3f(0, 0, 0), x3dom.fields.Eps)){
-                        var rot2 = x3dom.fields.Quaternion.rotateFromTo(this._eyeViewUp, yAxis);
-                        rotMat = rot2.toMatrix().transpose().mult(rotMat);
+                        // var rot2 = x3dom.fields.Quaternion.rotateFromTo(this._eyeViewUp, yAxis);
+                        // rotMat = rot2.toMatrix().transpose().mult(rotMat);
+                        var rot2 = x3dom.fields.Quaternion.rotateFromTo(this._eyeLook, zAxis); // new local z-axis aligned with camera z-axis
+                        var rotatedyAxis = rot2.toMatrix().transpose().multMatrixVec(yAxis); // new: local y-axis rotated by rot2
+                        var rot3 = x3dom.fields.Quaternion.rotateFromTo(this._eyeViewUp, rotatedyAxis); // new: rotated local y-axis aligned with camera y-axis
+                        rotMat = rot2.toMatrix().transpose().mult(rotMat); // new
+                        rotMat = rot3.toMatrix().transpose().mult(rotMat); // new
                     }
                 }
                 else{

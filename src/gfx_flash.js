@@ -122,6 +122,8 @@ x3dom.gfx_flash = (function() {
 		//Collect all drawableObjects
 		scene.drawableObjects = null;
 		scene.drawableObjects = [];
+		scene.drawableObjects.LODs = [];
+        scene.drawableObjects.Billboards = [];
 		scene.collectDrawableObjects(x3dom.fields.SFMatrix4f.identity(), scene.drawableObjects);
 		
 		//Get Number of drawableObjects
@@ -146,8 +148,7 @@ x3dom.gfx_flash = (function() {
 				}
 				
 				this.setupShape(obj3d, trafo, RefList[obj3d._objectID]);
-			}
-		
+			}	
 		}		
 			
 		//Render the flash scene
@@ -277,7 +278,7 @@ x3dom.gfx_flash = (function() {
 		{
 			//Check if is GeometryImage-Node
 			var isImageGeometry = x3dom.isa(shape._cf.geometry.node, x3dom.nodeTypes.ImageGeometry);
-		
+
 			//Set indices			
 			if( shape._dirty.indexes === true ) {
 				if(!isImageGeometry) {
@@ -304,7 +305,8 @@ x3dom.gfx_flash = (function() {
 														  bboxMin: shape._cf.geometry.node.getMin().toGL(),
 														  bboxMax: shape._cf.geometry.node.getMax().toGL(),
 														  bboxCenter: shape._cf.geometry.node.getCenter(),
-														  numTriangles: shape._cf.geometry.node._vf.vertexCount/3,
+														  primType: shape._cf.geometry.node._vf.primType,
+														  vertexCount: shape._cf.geometry.node._vf.vertexCount,
 													      coordinateTexture0: shape._cf.geometry.node.getCoordinateTextureURL(0),
 														  coordinateTexture1: shape._cf.geometry.node.getCoordinateTextureURL(1) } );
 				}

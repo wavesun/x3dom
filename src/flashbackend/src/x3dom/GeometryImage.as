@@ -6,14 +6,21 @@ package x3dom
 	import flash.geom.Vector3D;
 	import flash.net.URLRequest;
 	
+	import mx.flash.UIMovieClip;
+	
 	
 
 	public class GeometryImage extends Shape
 	{
-		
-		private var _coordinateTextureLoaded:Boolean;
+		private var _coordinateTexturesLoaded:Boolean;
+		private var _coordinateTexture0Loaded:Boolean;
+		private var _coordinateTexture1Loaded:Boolean;
 		private var _normalTextureLoaded:Boolean;
 		private var _texCoordTextureLoaded:Boolean;
+		private var _coords0:Bitmap = null;
+		private var _coords1:Bitmap = null;
+		private var _primType:Array = new Array();
+		private var _vertexCount:Array = new Array();
 		
 		/**
 		 * 
@@ -21,7 +28,7 @@ package x3dom
 		public function GeometryImage()
 		{
 			super();
-			_ready = false;
+			this._ready = false;
 		}
 		
 		/**
@@ -29,35 +36,66 @@ package x3dom
 		 */
 		public function setProperties(value:Object) : void
 		{
-			
-			//Set number of Triangles
-			this._numTriangles[0] = Number( value.numTriangles );
-			
-			generateIndices();
+			//Set number of Triangle, vertexCount and primTypes
+			for(var i:uint=0; i<value.primType.length; i++)
+			{
+				this._primType[i] = value.primType[i];
+				
+				this._vertexCount[i] = Number(value.vertexCount[i]);
+				
+				if(this._primType[i] == 'TRIANGLES') 
+				{
+					this._numTriangles[i] = this._vertexCount[i] / 3;
+					this.generateIndices(i);
+				} 
+				else if(this._primType[i] == 'TRIANGLESTRIP') 
+				{
+					this._numTriangles[i] = this._vertexCount[i] - 2;
+					this.generateTriangleStripIndices(i)
+				}
+			}
 			
 			//Set boundingbox center
-			_boundingBox.center.setTo(value.bboxCenter[0], value.bboxCenter[1], value.bboxCenter[2]);
+			this._boundingBox.center.setTo(value.bboxCenter[0], value.bboxCenter[1], value.bboxCenter[2]);
 			
 			//Set boundingbox min
-			_boundingBox.min.setTo(value.bboxMin[0], value.bboxMin[1], value.bboxMin[2]);		
+			this._boundingBox.min.setTo(value.bboxMin[0], value.bboxMin[1], value.bboxMin[2]);		
 	
 			//Set boundingBox max
-			_boundingBox.max.setTo(value.bboxMax[0], value.bboxMax[1], value.bboxMax[2]);	
+			this._boundingBox.max.setTo(value.bboxMax[0], value.bboxMax[1], value.bboxMax[2]);	
 		}
 		
 		/**
 		 * 
 		 */
-		private function generateIndices() : void
+		private function generateIndices(idx:uint) : void
 		{
 			var indices:Vector.<uint> = new Vector.<uint>();
 			
-			for(var i:uint = 0; i<_numTriangles[0]*3; i++)
+			for(var i:uint = 0; i<this._numTriangles[idx]*3; i++)
 			{
 				indices.push(i);
 			}
 			
-			setIndices(0, indices);
+			this.setIndices(idx, indices);
+		}
+		
+		/**
+		 * 
+		 */
+		private function generateTriangleStripIndices(idx:uint) : void
+		{
+			var indices:Vector.<uint> = new Vector.<uint>();
+			
+			for(var i:uint=0; i<Math.round(this._numTriangles[idx]); i+=2)
+			{
+				if(i != 0) {
+					indices.push(i, i-1, i+1);
+				}
+				indices.push(i, i+1, i+2);
+			}
+			
+			this.setIndices(idx, indices);
 		}
 		
 		/**
@@ -65,17 +103,32 @@ package x3dom
 		 */
 		public function setCoordinateTexture(value:Object) : void
 		{
-			if(value.coordinateTexture)
+			this._coordinateTexturesLoaded = false;
+			
+			if(value.coordinateTexture0)
 			{
-				_coordinateTextureLoaded = false;
+				this._coordinateTexture0Loaded = false;
 				
-				var coordinateLoader:Loader = new Loader();
-				coordinateLoader.contentLoaderInfo.addEventListener(Event.COMPLETE, handleCoordinateComplete);
-				coordinateLoader.load(new URLRequest(value.coordinateTexture));
+				var coordinateLoader0:Loader = new Loader();
+				coordinateLoader0.contentLoaderInfo.addEventListener(Event.COMPLETE, handleCoordinate0Complete);
+				coordinateLoader0.load(new URLRequest(value.coordinateTexture0));
 			}
 			else
 			{
-				_coordinateTextureLoaded = true;
+				this._coordinateTexture0Loaded = true;
+			}
+			
+			if(value.coordinateTexture1)
+			{
+				this._coordinateTexture1Loaded = false;
+				
+				var coordinateLoader1:Loader = new Loader();
+				coordinateLoader1.contentLoaderInfo.addEventListener(Event.COMPLETE, handleCoordinate1Complete);
+				coordinateLoader1.load(new URLRequest(value.coordinateTexture1));
+			}
+			else
+			{
+				this._coordinateTexture1Loaded = true;
 			}
 		}
 		
@@ -86,7 +139,7 @@ package x3dom
 		{
 			if(value.normalTexture)
 			{
-				_normalTextureLoaded = false;
+				this._normalTextureLoaded = false;
 				
 				var normalLoader:Loader = new Loader();
 				normalLoader.contentLoaderInfo.addEventListener(Event.COMPLETE, handleNormalComplete);
@@ -94,7 +147,7 @@ package x3dom
 			}
 			else
 			{
-				_normalTextureLoaded = true;
+				this._normalTextureLoaded = true;
 			}
 		}
 		
@@ -103,10 +156,9 @@ package x3dom
 		 */
 		public function setTexCoordTexture(value:Object) : void
 		{
-			x3dom.Debug.logInfo(value.texCoordTexture);
 			if(value.texCoordTexture)
 			{
-				_texCoordTextureLoaded = false;
+				this._texCoordTextureLoaded = false;
 				
 				var coordinateLoader:Loader = new Loader();
 				coordinateLoader.contentLoaderInfo.addEventListener(Event.COMPLETE, handleTexCoordComplete);
@@ -114,41 +166,85 @@ package x3dom
 			}
 			else
 			{
-				_texCoordTextureLoaded = true;
+				this._texCoordTextureLoaded = true;
 			}
 		}
 		
 		/**
 		 * 
 		 */
-		private function handleCoordinateComplete(e:Event) : void
+		private function handleCoordinate0Complete(e:Event) : void
 		{
-			var bitmap:Bitmap = Bitmap( e.target.content );
+			this._coords0 = Bitmap( e.target.content );
+			this._coordinateTexture0Loaded = true;
+			if(this._coordinateTexture1Loaded == true) {
+				this.setMultiCoordinates()
+			}
 			
+		}
+		
+		/**
+		 * 
+		 */
+		private function handleCoordinate1Complete(e:Event) : void
+		{
+			this._coords1 = Bitmap( e.target.content );
+			this._coordinateTexture1Loaded = true;
+			if(this._coordinateTexture0Loaded == true) {
+				this.setMultiCoordinates()
+			}
+		}
+		
+		private function setMultiCoordinates() : void
+		{
 			var color:uint;
-			var coordinate:Vector3D = new Vector3D();
-			var bias:Vector3D = _boundingBox.max.subtract(_boundingBox.min);
+			var idx:uint = 0;
+			var coordinate0:Vector3D = new Vector3D();
+			var coordinate1:Vector3D = new Vector3D();
+			var bias:Vector3D = this._boundingBox.max.subtract(_boundingBox.min);
 			var vertices:Vector.<Number> = new Vector.<Number>();
 			
-			for(var y:uint=0; y<bitmap.height; y++)
+			for(var y:uint=0; y<this._coords0.height; y++)
 			{
-				for(var x:uint=0; x<bitmap.width; x++)
+				for(var x:uint=0; x<this._coords0.width; x++)
 				{
-					if( (y * bitmap.width + x) >= (_numTriangles[0] * 3) ) break;
 					
-					color = bitmap.bitmapData.getPixel(x,y);
+					if( vertices.length/3 == (this._vertexCount[idx]) ) {
+						this.setVertices(idx, vertices);
+						idx++;
+						if(idx < this._vertexCount.length){
+							vertices = new Vector.<Number>();
+						} else {
+							break;
+						}
+					}
 					
-					coordinate.x = ( (color >> 16 & 0xFF) / 255.0 ) * bias.x;
-					coordinate.y = ( (color >> 8 & 0xFF) / 255.0 ) * bias.y;
-					coordinate.z = ( (color & 0xFF) / 255.0 ) * bias.z;
-					coordinate = coordinate.add(_boundingBox.min);
+					color = this._coords0.bitmapData.getPixel(x,y);
 					
-					vertices.push(coordinate.x, coordinate.y, coordinate.z);
+					coordinate0.x = ( (color >> 16 & 0xFF) / 255.0 );
+					coordinate0.y = ( (color >> 8 & 0xFF) / 255.0 );
+					coordinate0.z = ( (color & 0xFF) / 255.0 );
+					
+					if(this._coords1) {
+						color = this._coords1.bitmapData.getPixel(x,y);
+						
+						coordinate1.x = ( (color >> 16 & 0xFF) / 65280.0 );
+						coordinate1.y = ( (color >> 8 & 0xFF) / 65280.0 );
+						coordinate1.z = ( (color & 0xFF) / 65280.0 );
+						
+						coordinate0.incrementBy(coordinate1);
+					}
+					
+					coordinate0.x = (coordinate0.x * bias.x) + this._boundingBox.min.x;
+					coordinate0.y = (coordinate0.y * bias.y) + this._boundingBox.min.y;
+					coordinate0.z = (coordinate0.z * bias.z) + this._boundingBox.min.z;
+					
+					vertices.push(coordinate0.x, coordinate0.y, coordinate0.z);
+					
 				}
 			}
-			setVertices(0, vertices);
 			
-			_coordinateTextureLoaded = true;
+			this._coordinateTexturesLoaded = true;
 			
 			if(_normalTextureLoaded && _texCoordTextureLoaded) 
 			{
@@ -157,6 +253,7 @@ package x3dom
 			}
 		}
 		
+		
 		/**
 		 * 
 		 */
@@ -164,7 +261,8 @@ package x3dom
 		{
 			var bitmap:Bitmap = Bitmap( e.target.content );
 			
-			var color:uint;
+			var color:uint;		
+			var idx:uint = 0;
 			var normal:Vector3D = new Vector3D();
 			var normals:Vector.<Number> = new Vector.<Number>();
 			
@@ -172,7 +270,15 @@ package x3dom
 			{
 				for(var x:uint=0; x<bitmap.width; x++)
 				{
-					if( (y * bitmap.width + x) >= (_numTriangles[0] * 3) ) break;
+					if( normals.length/3 == (this._vertexCount[idx]) ) {
+						this.setNormals(idx, normals);
+						idx++;
+						if(idx < this._vertexCount.length){
+							normals = new Vector.<Number>();
+						} else {
+							break;
+						}
+					}
 					
 					color = bitmap.bitmapData.getPixel(x,y);
 					
@@ -192,13 +298,11 @@ package x3dom
 				}
 			}
 			
-			setNormals(0, normals);
+			this._normalTextureLoaded = true;
 			
-			_normalTextureLoaded = true;
-			
-			if(_coordinateTextureLoaded && _texCoordTextureLoaded) 
+			if(_coordinateTexturesLoaded && _texCoordTextureLoaded) 
 			{
-				_ready = true;
+				this._ready = true;
 				this.dispatchEvent( new Event( Event.COMPLETE ) );
 			}
 		}
@@ -210,32 +314,54 @@ package x3dom
 		{
 			var bitmap:Bitmap = Bitmap( e.target.content );
 			
-			var color:uint;
+			var color:uint;	
+			var idx:uint = 0;
 			var texCoord:Vector3D = new Vector3D();
+			var texCoord0:Vector3D = new Vector3D();
+			var texCoord1:Vector3D = new Vector3D();
 			var texCoords:Vector.<Number> = new Vector.<Number>();
 			
 			for(var y:uint=0; y<bitmap.height; y++)
 			{
 				for(var x:uint=0; x<bitmap.width; x++)
 				{
-					if( (y * bitmap.width + x) >= (_numTriangles[0] * 3) ) break;
+					if( texCoords.length/2 == (this._vertexCount[idx]) ) {
+						this.setTexCoords(idx, texCoords);
+						idx++;
+						if(idx < this._vertexCount.length){
+							texCoords = new Vector.<Number>();
+						} else {
+							break;
+						}
+					}
+
+					color = bitmap.bitmapData.getPixel32(x,y);
 					
-					color = bitmap.bitmapData.getPixel(x,y);
+					texCoord0.w = (color >> 24 & 0xFF) / 255.0;
+					texCoord0.x = (color >> 16 & 0xFF) / 255.0;
+					texCoord0.y = (color >> 8 & 0xFF) / 255.0;
+					texCoord0.z = (color & 0xFF) / 255.0;
 					
-					texCoord.x = (color >> 16 & 0xFF) / 255.0;
-					texCoord.y = (color >> 8 & 0xFF) / 255.0;
+					//x3dom.Debug.logInfo("U: " + texCoord0.x.toPrecision(21) + " V: " + texCoord0.y.toPrecision(21));
+					
+					//color = bitmap.bitmapData.getPixel32(x,y);
+					
+					texCoord.x = (texCoord0.x * 0.996108948) + (texCoord0.z * 0.003891051);
+					texCoord.y = (texCoord0.y * 0.996108948) + (texCoord0.w * 0.003891051);
+					
+					//p[0] = (((col[0] * 255) * 256) + (col[2] * 255)) / 65535;
+					
+					//x3dom.Debug.logInfo("U: " + texCoord.x + " V: " + texCoord.y);
 					
 					texCoords.push(texCoord.x, texCoord.y);
 				}
 			}
 			
-			setTexCoords(0, texCoords);
+			this._texCoordTextureLoaded = true;
 			
-			_texCoordTextureLoaded = true;
-			
-			if(_coordinateTextureLoaded && _normalTextureLoaded) 
+			if(_coordinateTexturesLoaded && _normalTextureLoaded) 
 			{
-				_ready = true;
+				this._ready = true;
 				this.dispatchEvent( new Event( Event.COMPLETE ) );
 			}
 		}

@@ -109,12 +109,24 @@ x3dom.userAgentFeature = {
 
         // Search all X3D elements in the page
         var x3ds = document.getElementsByTagName('X3D');
-        var w3sg = document.getElementsByTagName('webSG');
+        var w3sg = document.getElementsByTagName('webSG');	// FIXME
 
         // ~~ Components and params {{{ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
         var params;
         var settings = new x3dom.Properties();  // stores the stuff in <param>
+        var validParams = array_to_object([ 
+            'showLog', 
+            'showStat',
+            'showProgress', 
+            'PrimitiveQuality', 
+            'component', 
+            'loadpath', 
+            'disableDoubleClick',
+            'maxActiveDownloads'
+        ]);
         var components, prefix;
+		
+		var showLoggingConsole = false;
 
         // for each X3D element
         for (i=0; i < x3ds.length; i++) {
@@ -129,27 +141,48 @@ x3dom.userAgentFeature = {
             // add settings to properties object
             params = x3ds[i].getElementsByTagName('PARAM');
             for (j=0; j < params.length; j++) {
-                settings.setProperty(params[j].getAttribute('name'), params[j].getAttribute('value'));
+                if (params[j].getAttribute('name') in  validParams) {
+                    settings.setProperty(params[j].getAttribute('name'), params[j].getAttribute('value'));
+                } else {
+                    //x3dom.debug.logError("Unknown parameter: " + params[j].getAttribute('name'));
+                }
             }
 
             // enable log
             if (settings.getProperty('showLog') === 'true') {
-                x3dom.debug.activate(true);
-            } else {
-                x3dom.debug.activate(false);
+				showLoggingConsole = true;
             }
 
-            // load components from params or default to x3d attribute
-            components = settings.getProperty('components', x3ds[i].getAttribute("components"));
-            if (components) {
-                prefix = settings.getProperty('loadpath', x3ds[i].getAttribute("loadpath"))
-                components = components.trim().split(',');
-                for (j=0; j < components.length; j++) {
-                    x3dom.loadJS(components[j] + ".js", prefix);
+            if (typeof X3DOM_SECURITY_OFF != 'undefined' && X3DOM_SECURITY_OFF === true) {
+                // load components from params or default to x3d attribute
+                components = settings.getProperty('components', x3ds[i].getAttribute("components"));
+                if (components) {
+                    prefix = settings.getProperty('loadpath', x3ds[i].getAttribute("loadpath"))
+                    components = components.trim().split(',');
+                    for (j=0; j < components.length; j++) {
+                        x3dom.loadJS(components[j] + ".js", prefix);
+                    }
+                }
+            }
+
+            // src=foo.x3d adding inline node, not a good idea, but...
+            if (typeof X3DOM_SECURITY_OFF != 'undefined' && X3DOM_SECURITY_OFF === true) {
+                if (x3ds[i].getAttribute("src")) {
+                    var _scene = document.createElement("scene");
+                    var _inl = document.createElement("Inline");
+                    _inl.setAttribute("url", x3ds[i].getAttribute("src"));
+                    _scene.appendChild(_inl);
+                    x3ds[i].appendChild(_scene);
                 }
             }
         }
         // }}}
+		
+		if (showLoggingConsole == true) {
+			x3dom.debug.activate(true);
+		} else {
+			x3dom.debug.activate(false);
+		}
 
 
         // active hacky DOMAttrModified workaround to webkit
@@ -160,7 +193,8 @@ x3dom.userAgentFeature = {
 
         // Convert the collection into a simple array (is this necessary?)
         x3ds = Array.map(x3ds, function (n) {
-            n.runtime = x3dom.runtime;
+            //n.runtime = x3dom.runtime;
+            n.runtime = new x3dom.Runtime();
             n.hasRuntime = true;
             return n;
         });
@@ -213,7 +247,7 @@ x3dom.userAgentFeature = {
                 
                 x3dcanvas.x3dElem.appendChild(altDiv);
 
-                // remove the stats div (it's not ed when WebGL doesnt work)
+                // remove the stats div (it's not added when WebGL doesn't work)
                 if (x3dcanvas.statDiv) { 
                     x3d_element.removeChild(x3dcanvas.statDiv);
                 }
@@ -230,11 +264,14 @@ x3dom.userAgentFeature = {
             
             t0 = new Date().getTime();
 
-            if (!x3ds[i].runtime) {
-                 x3ds[i].runtime = x3dom.runtime;
-            }  
+//            if (!x3ds[i].runtime) {
+                 x3ds[i].runtime = new x3dom.Runtime(x3ds[i], x3dcanvas);
+//            }
 
             x3ds[i].runtime.initialize(x3ds[i], x3dcanvas);
+            if (x3dom.runtime.ready) {
+                x3ds[i].runtime.ready = x3dom.runtime.ready;
+            }
 
             x3dcanvas.load(x3ds[i], i, settings);
 
@@ -269,6 +306,12 @@ x3dom.userAgentFeature = {
             x3dom.canvases.push(x3dcanvas);
 			t1 = new Date().getTime() - t0;
             x3dom.debug.logInfo("Time for setup and init of GL element no. " + i + ": " + t1 + " ms.");
+			
+            //Start image queue
+
+		    // gets the value of param name="maxActiveDownloads"
+		    // settings.getProperty('maxActiveDownloads', 10);
+            //x3dom.ImageLoadManager.load();
         }
         
         var ready = (function(eventType) {

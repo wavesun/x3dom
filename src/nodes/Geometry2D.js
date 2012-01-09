@@ -66,39 +66,39 @@ x3dom.registerNodeType(
         {
             nodeChanged: function() {},
             fieldChanged: function(fieldName) {
-				this._mesh._positions[0] = [];
-				this._mesh._indices[0] =[];
+					this._mesh._positions[0] = [];
+					this._mesh._indices[0] =[];
+						
+					var r = this._vf.radius;
+					var start = this._vf.startAngle;
+					var end = this._vf.endAngle;
+					var anzahl = this._vf.subdivision;
 					
-                var r = this._vf.radius;
-				var start = this._vf.startAngle;
-				var end = this._vf.endAngle;
-                var anzahl = this._vf.subdivision;
-				
-				var t = (end - start) / anzahl;
-				var theta = start;
+					var t = (end - start) / anzahl;
+					var theta = start;
+						
+					for (var i = 0; i <= anzahl +1; i++) {
+						var x = Math.cos(theta) * r;
+						var y = Math.sin(theta) * r;
 					
-				for (var i = 0; i <= anzahl +1; i++) {
-					var x = Math.cos(theta) * r;
-					var y = Math.sin(theta) * r;
-				
-					this._mesh._positions[0].push(x);
-					this._mesh._positions[0].push(y);
-					this._mesh._positions[0].push(0.0);
-					theta += t;
-				}
-											
-				for (var j = 0; j < anzahl; j++) {
-					this._mesh._indices[0].push(j);
-					this._mesh._indices[0].push(j + 1);		
-				}
-				this._mesh._invalidate = true;
-				this._mesh._numFaces = this._mesh._indices[0].length / 2;
-				this._mesh._numCoords = this._mesh._positions[0].length / 3;
-					   
-				Array.forEach(this._parentNodes, function (node) {
-                   	node._dirty.positions = true;
-                });}
-        }
+						this._mesh._positions[0].push(x);
+						this._mesh._positions[0].push(y);
+						this._mesh._positions[0].push(0.0);
+						theta += t;
+					}
+												
+					for (var j = 0; j < anzahl; j++) {
+						this._mesh._indices[0].push(j);
+						this._mesh._indices[0].push(j + 1);		
+					}
+					this._mesh._invalidate = true;
+					this._mesh._numFaces = this._mesh._indices[0].length / 2;
+					this._mesh._numCoords = this._mesh._positions[0].length / 3;
+						   
+					Array.forEach(this._parentNodes, function (node) {
+						node._dirty.positions = true;
+					});}
+				} 
     )
 );
 
@@ -220,102 +220,158 @@ x3dom.registerNodeType(
         {
             nodeChanged: function() {},
             fieldChanged: function(fieldName) {
-				this._mesh._positions[0] = [];
-				this._mesh._indices[0] =[];
-				this._mesh._normals[0] = [];
-				this._mesh._texCoords[0] = [];
+				if(fieldName === "radius") {
+					this._mesh._positions[0] = [];
 					
-                var r = this._vf.radius;
-				var start = this._vf.startAngle;
-				var end = this._vf.endAngle;
-				var anzahl = this._vf.subdivision;
-				var t = (end - start) / anzahl;
-				var theta = start;
-				
-				if(this._vf.closureType == 'PIE') {
+					var r = this._vf.radius;
+					var start = this._vf.startAngle;
+					var end = this._vf.endAngle;
+					var anzahl = this._vf.subdivision;
+					var t = (end - start) / anzahl;
+					var theta = start;
 					
-					this._mesh._positions[0].push(0.0);
-					this._mesh._positions[0].push(0.0);
-					this._mesh._positions[0].push(0.0);
-					
-					this._mesh._normals[0].push(0);
-					this._mesh._normals[0].push(0);
-					this._mesh._normals[0].push(1);
-					
-					this._mesh._texCoords[0].push(0.5);
-					this._mesh._texCoords[0].push(0.5);
-					
-					for (var i = 0; i <= anzahl; i++) {
-						var x = Math.cos(theta) * r;
-						var y = Math.sin(theta) * r;
-					
+					if(this._vf.closureType == 'PIE') {
+						
+						this._mesh._positions[0].push(0.0);
+						this._mesh._positions[0].push(0.0);
+						this._mesh._positions[0].push(0.0);
+						
+						for (var i = 0; i <= anzahl; i++) {
+							var x = Math.cos(theta) * r;
+							var y = Math.sin(theta) * r;
+						
+							this._mesh._positions[0].push(x);
+							this._mesh._positions[0].push(y);
+							this._mesh._positions[0].push(0.0);
+											
+							theta += t;
+						}
+					} else {
+						for (var i = 0; i <= anzahl; i++) {
+							var x = Math.cos(theta) * r;
+							var y = Math.sin(theta) * r;
+						
+							this._mesh._positions[0].push(x);
+							this._mesh._positions[0].push(y);
+							this._mesh._positions[0].push(0.0);
+						
+							theta += t;
+						}
+						
+						var x = (this._mesh._positions[0][0] + this._mesh._positions[0][ this._mesh._positions[0].length - 3]) /2;
+						var y = (this._mesh._positions[0][1] + this._mesh._positions[0][ this._mesh._positions[0].length - 2]) /2;
+						
 						this._mesh._positions[0].push(x);
 						this._mesh._positions[0].push(y);
 						this._mesh._positions[0].push(0.0);
-							
-						this._mesh._normals[0].push(0);
-						this._mesh._normals[0].push(0);
-						this._mesh._normals[0].push(1);
-							
-						this._mesh._texCoords[0].push((x + r)/(2 * r));
-						this._mesh._texCoords[0].push((y + r)/(2 * r));
-										
-						theta += t;
 					}
-												
-					for (var j = 1; j <= anzahl; j++) {
-						this._mesh._indices[0].push(j);
-						this._mesh._indices[0].push(0);
-						this._mesh._indices[0].push(j + 1);		
-					}
+					
+					this._mesh._invalidate = true;
+					this._mesh._numCoords = this._mesh._positions[0].length / 3;
+						   
+					Array.forEach(this._parentNodes, function (node) {
+						node._dirty.positions = true;
+					});
+				
 					
 				} else {
-					for (var i = 0; i <= anzahl; i++) {
-						var x = Math.cos(theta) * r;
-						var y = Math.sin(theta) * r;
+					this._mesh._positions[0] = [];
+					this._mesh._indices[0] =[];
+					this._mesh._normals[0] = [];
+					this._mesh._texCoords[0] = [];
+						
+					var r = this._vf.radius;
+					var start = this._vf.startAngle;
+					var end = this._vf.endAngle;
+					var anzahl = this._vf.subdivision;
+					var t = (end - start) / anzahl;
+					var theta = start;
 					
-						this._mesh._positions[0].push(x);
-						this._mesh._positions[0].push(y);
+					if(this._vf.closureType == 'PIE') {
+						
 						this._mesh._positions[0].push(0.0);
-							
+						this._mesh._positions[0].push(0.0);
+						this._mesh._positions[0].push(0.0);
+						
 						this._mesh._normals[0].push(0);
 						this._mesh._normals[0].push(0);
 						this._mesh._normals[0].push(1);
-							
+						
+						this._mesh._texCoords[0].push(0.5);
+						this._mesh._texCoords[0].push(0.5);
+						
+						for (var i = 0; i <= anzahl; i++) {
+							var x = Math.cos(theta) * r;
+							var y = Math.sin(theta) * r;
+						
+							this._mesh._positions[0].push(x);
+							this._mesh._positions[0].push(y);
+							this._mesh._positions[0].push(0.0);
+								
+							this._mesh._normals[0].push(0);
+							this._mesh._normals[0].push(0);
+							this._mesh._normals[0].push(1);
+								
+							this._mesh._texCoords[0].push((x + r)/(2 * r));
+							this._mesh._texCoords[0].push((y + r)/(2 * r));
+											
+							theta += t;
+						}
+													
+						for (var j = 1; j <= anzahl; j++) {
+							this._mesh._indices[0].push(j);
+							this._mesh._indices[0].push(0);
+							this._mesh._indices[0].push(j + 1);		
+						}
+						
+					} else {
+						for (var i = 0; i <= anzahl; i++) {
+							var x = Math.cos(theta) * r;
+							var y = Math.sin(theta) * r;
+						
+							this._mesh._positions[0].push(x);
+							this._mesh._positions[0].push(y);
+							this._mesh._positions[0].push(0.0);
+								
+							this._mesh._normals[0].push(0);
+							this._mesh._normals[0].push(0);
+							this._mesh._normals[0].push(1);
+								
+							this._mesh._texCoords[0].push((x + r)/(2 * r));
+							this._mesh._texCoords[0].push((y + r)/(2 * r));
+							theta += t;
+						}
+						
+						var x = (this._mesh._positions[0][0] + this._mesh._positions[0][ this._mesh._positions[0].length - 3]) /2;
+						var y = (this._mesh._positions[0][1] + this._mesh._positions[0][ this._mesh._positions[0].length - 2]) /2;
+						
+						this._mesh._positions[0].push(x);
+						this._mesh._positions[0].push(y);
+						this._mesh._positions[0].push(0.0);
+						
+						this._mesh._normals[0].push(0);
+						this._mesh._normals[0].push(0);
+						this._mesh._normals[0].push(1);
+						
 						this._mesh._texCoords[0].push((x + r)/(2 * r));
 						this._mesh._texCoords[0].push((y + r)/(2 * r));
-						theta += t;
+						
+						for (var j = 0; j < anzahl; j++) {
+							this._mesh._indices[0].push(j);
+							this._mesh._indices[0].push(anzahl + 1);
+							this._mesh._indices[0].push(j + 1);
+						}	
 					}
 					
-					var x = (this._mesh._positions[0][0] + this._mesh._positions[0][ this._mesh._positions[0].length - 3]) /2;
-					var y = (this._mesh._positions[0][1] + this._mesh._positions[0][ this._mesh._positions[0].length - 2]) /2;
-					
-					this._mesh._positions[0].push(x);
-					this._mesh._positions[0].push(y);
-					this._mesh._positions[0].push(0.0);
-					
-					this._mesh._normals[0].push(0);
-					this._mesh._normals[0].push(0);
-					this._mesh._normals[0].push(1);
-					
-					this._mesh._texCoords[0].push((x + r)/(2 * r));
-					this._mesh._texCoords[0].push((y + r)/(2 * r));
-					
-					for (var j = 0; j < anzahl; j++) {
-						this._mesh._indices[0].push(j);
-						this._mesh._indices[0].push(anzahl + 1);
-						this._mesh._indices[0].push(j + 1);
-					}	
+					this._mesh._numTexComponents = 2;
+					this._mesh._invalidate = true;
+					this._mesh._numFaces = this._mesh._indices[0].length / 2;
+					this._mesh._numCoords = this._mesh._positions[0].length / 3;
+						   
+					Array.forEach(this._parentNodes, function (node) {
+					   node.setAllDirty();
+					});
 				}
-				
-				this._mesh._numTexComponents = 2;
-				this._mesh._invalidate = true;
-				this._mesh._numFaces = this._mesh._indices[0].length / 2;
-				this._mesh._numCoords = this._mesh._positions[0].length / 3;
-					   
-				Array.forEach(this._parentNodes, function (node) {
-                   node.setAllDirty();
-                });
 			}
         }
     )
@@ -706,7 +762,6 @@ x3dom.registerNodeType(
         }
     )
 );
-
 /* ### Rectangle2D ### */
 x3dom.registerNodeType(
     "Rectangle2D",
@@ -718,8 +773,10 @@ x3dom.registerNodeType(
 			this.addField_SFVec2f(ctx, 'size', 2, 2);
             this.addField_SFBool(ctx, 'solid', false);
             this.addField_SFBool(ctx, 'lit', true);
+			this.addField_SFVec2f(ctx, 'subdivision', 1, 1);
 
             var sx = this._vf.size.x, sy = this._vf.size.y;
+			var partx = this._vf.subdivision.x, party = this._vf.subdivision.y;
          	
 			var geoCacheID = 'Rectangle2D_'+sx+'-'+sy;
 
@@ -730,23 +787,34 @@ x3dom.registerNodeType(
 			}
 			else
 			{
-				sx /= 2; sy /= 2;
+                var xstep = sx / partx;
+                var ystep = sy / party;
 
-				this._mesh._positions[0] = [
-					-sx,-sy, 0.0, -sx, sy, 0.0,  sx, sy, 0.0,  sx,-sy, 0.0
-				];
-				this._mesh._normals[0] = [
-					0,0,1,  0,0,1,   0,0,1,   0,0,1
-				];
-				this._mesh._texCoords[0] = [
-					0,0, 0,1, 1,1, 1,0
-				];
-				this._mesh._indices[0] = [
-					0,1,2, 2,3,0
-				];
+                sx /= 2; sy /= 2;
+
+                for (var i = 0; i <= partx; i++) {
+                    for (var j = 0; j <= party; j++) {
+                        this._mesh._positions[0].push(i * xstep - sx, j * ystep - sy, 0);
+						this._mesh._normals[0].push(0, 0, 1);
+						this._mesh._texCoords[0].push(i/partx, j/party);
+                    }
+                }
+
+                for (var i = 1; i <= party; i++) {
+                    for (var j = 0; j < partx; j++) {
+                        this._mesh._indices[0].push((i - 1) * (partx + 1) + j);
+                        this._mesh._indices[0].push((i - 1) * (partx + 1) + j + 1);
+                        this._mesh._indices[0].push(i * (partx + 1) + j);
+
+                        this._mesh._indices[0].push(i * (partx + 1) + j);
+                        this._mesh._indices[0].push((i - 1) * (partx + 1) + j + 1);
+                        this._mesh._indices[0].push(i * (partx + 1) + j + 1);
+                    }
+                }
+                
 				this._mesh._invalidate = true;
-				this._mesh._numFaces = 2;
-				this._mesh._numCoords = 4;
+				this._mesh._numFaces = this._mesh._indices[0].length / 3;
+				this._mesh._numCoords = this._mesh._positions[0].length / 3;
 
 				x3dom.geoCache[geoCacheID] = this._mesh;
 			}
@@ -756,20 +824,74 @@ x3dom.registerNodeType(
             fieldChanged: function(fieldName) {
 				if (fieldName == "size")
                 { 
+					this._mesh._positions[0] = [];
                     var size = this._vf.size;
                 	var sx = size.x / 2;
                		var sy = size.y / 2;
+					
+					var partx = this._vf.subdivision.x, party = this._vf.subdivision.y;
 
-                   this._mesh._positions[0] = [
-						-sx,-sy, 0.0, -sx, sy, 0.0,  sx, sy, 0.0,  sx,-sy, 0.0
-				   ]; 
+                    var xstep = sx / partx;
+					var ystep = sy / party;
+	
+					sx /= 2; sy /= 2;
+	
+					for (var i = 0; i <= partx; i++) {
+						for (var j = 0; j <= party; j++) {
+							this._mesh._positions[0].push(i * xstep - sx, j * ystep - sy, 0);
+						}
+					}
 				   
 				   this._mesh._invalidate = true;
+				   this._mesh._numCoords = this._mesh._positions[0].length / 3;
 				   
 				   Array.forEach(this._parentNodes, function (node) {
                         node._dirty.positions = true;
                    });
-                }
+					
+                } else {
+					this._mesh._positions[0] = [];
+					this._mesh._indices[0] =[];
+					this._mesh._normals[0] = [];
+					this._mesh._texCoords[0] =[];
+					
+                	var sx = this._vf.size.x / 2;
+               		var sy = this._vf.size.y / 2;
+					
+					var partx = this._vf.subdivision.x, party = this._vf.subdivision.y;
+					var xstep = sx / partx;
+					var ystep = sy / party;
+	
+					sx /= 2; sy /= 2;
+	
+					for (var i = 0; i <= partx; i++) {
+						for (var j = 0; j <= party; j++) {
+							this._mesh._positions[0].push(i * xstep - sx, j * ystep - sy, 0);
+							this._mesh._normals[0].push(0, 0, 1);
+							this._mesh._texCoords[0].push(i/partx, j/party);
+						}
+					}
+	
+					for (var i = 1; i <= party; i++) {
+						for (var j = 0; j < partx; j++) {
+							this._mesh._indices[0].push((i - 1) * (partx + 1) + j);
+							this._mesh._indices[0].push((i - 1) * (partx + 1) + j + 1);
+							this._mesh._indices[0].push(i * (partx + 1) + j);
+	
+							this._mesh._indices[0].push(i * (partx + 1) + j);
+							this._mesh._indices[0].push((i - 1) * (partx + 1) + j + 1);
+							this._mesh._indices[0].push(i * (partx + 1) + j + 1);
+						}
+					}
+					
+					this._mesh._invalidate = true;
+					this._mesh._numFaces = this._mesh._indices[0].length / 3;
+					this._mesh._numCoords = this._mesh._positions[0].length / 3;
+					
+					Array.forEach(this._parentNodes, function (node) {
+						node.setAllDirty();
+					});
+				}
 			}
         }
     )

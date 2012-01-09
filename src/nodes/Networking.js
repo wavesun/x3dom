@@ -50,7 +50,12 @@ x3dom.registerNodeType(
 
             this.addField_MFString(ctx, 'url', []);
             this.addField_SFBool(ctx, 'load', true);
-        },
+			this.addField_MFString(ctx, 'nameSpaceName', []);
+			this.addField_SFBool(ctx, 'mapDEFToID', false);
+			
+			
+			this.currentInline = ctx.xmlNode;
+       },
         {
             fieldChanged: function (fieldName)
             {
@@ -65,18 +70,22 @@ x3dom.registerNodeType(
                 var that = this;
 
                 var xhr = new window.XMLHttpRequest();
-                xhr.overrideMimeType('text/xml');   //application/xhtml+xml
+				if(xhr.overrideMimeType) {
+					xhr.overrideMimeType('text/xml');   //application/xhtml+xml
+				}
                 this._nameSpace.doc.downloadCount += 1;
 
                 xhr.onreadystatechange = function () {
                     if (xhr.readyState == 4) {
                         delete xhr['onreadystatechange'];
-                        if (xhr.responseXML.documentElement.localName == 'parsererror') {
-                            that._nameSpace.doc.downloadCount -= 1;
-                            x3dom.debug.logError('XML parser failed on ' + that._vf.url +
-                                        ':\n' + xhr.responseXML.documentElement.textContent);
-                            return xhr;
-                        }
+						if(navigator.appName != "Microsoft Internet Explorer") {
+							if (xhr.responseXML.documentElement.localName == 'parsererror') {
+								that._nameSpace.doc.downloadCount -= 1;
+								x3dom.debug.logError('XML parser failed on ' + that._vf.url +
+											':\n' + xhr.responseXML.documentElement.textContent);
+								return xhr;
+							}
+						}
                     } else {
                         // still loading
                         //x3dom.debug.logInfo('Loading inlined data... (readyState: ' + xhr.readyState + ')');
@@ -92,7 +101,11 @@ x3dom.registerNodeType(
 
                     x3dom.debug.logInfo('Inline: downloading '+that._vf.url+' done.');
 
-                    var xml = xhr.responseXML;
+                    if(navigator.appName != "Microsoft Internet Explorer"){
+						var xml = xhr.responseXML;
+					}else{
+						var xml = new DOMParser().parseFromString(xhr.responseText, "text/xml");
+					}
 
                     //TODO; check if exists and FIXME: it's not necessarily the first scene in the doc!
                     var inlScene = xml.getElementsByTagName('Scene')[0] || xml.getElementsByTagName('scene')[0];
@@ -103,7 +116,19 @@ x3dom.registerNodeType(
                         nameSpace = new x3dom.NodeNameSpace("", that._nameSpace.doc);
                         nameSpace.setBaseURL (that._vf.url[0]);
                         newScene = nameSpace.setupTree(inlScene);
-                    } else {
+											
+						
+						if(that._vf.nameSpaceName.length != 0) {
+							Array.forEach ( inlScene.childNodes, function (childDomNode) {
+								if(childDomNode instanceof Element){
+									setNamespace(that._vf.nameSpaceName, childDomNode, that._vf.mapDEFToID);
+									that.currentInline.appendChild(childDomNode);
+								}
+							} );
+						}
+						
+						
+				     } else {
                         x3dom.debug.logWarning('no Scene in ' + xml.localName);
                     }
 
@@ -134,3 +159,20 @@ x3dom.registerNodeType(
         }
     )
 );
+
+function setNamespace(prefix, childDomNode, mapDEFToID){
+	if(childDomNode instanceof Element) {
+	
+		if(childDomNode.hasAttribute('id'))	{
+			childDomNode.setAttribute('id', prefix.toString().replace(' ','') +'__'+ childDomNode.getAttribute('id'));	
+		} else if (childDomNode.hasAttribute('DEF') && mapDEFToID){
+			childDomNode.setAttribute('id', prefix.toString().replace(' ','') +'__'+ childDomNode.getAttribute('DEF'));
+		}
+	}
+	
+	if(childDomNode.hasChildNodes()){
+		Array.forEach ( childDomNode.childNodes, function (children) {
+				setNamespace(prefix, children, mapDEFToID);			
+		} );
+	}		
+}

@@ -130,7 +130,7 @@ x3dom.registerNodeType(
         },
         {
             nodeChanged: function()
-            {
+            {		
             },
 
             fieldChanged: function(fieldName)

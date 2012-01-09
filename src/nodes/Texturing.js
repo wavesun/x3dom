@@ -96,18 +96,21 @@ x3dom.registerNodeType(
     defineClass(x3dom.nodeTypes.X3DAppearanceChildNode,
         function (ctx) {
             x3dom.nodeTypes.X3DTextureNode.superClass.call(this, ctx);
-
+			
             this.addField_SFInt32(ctx, 'origChannelCount', 0); // 0 means the system should figure out the count
             this.addField_MFString(ctx, 'url', []);
             this.addField_SFBool(ctx, 'repeatS', true);
             this.addField_SFBool(ctx, 'repeatT', true);
             this.addField_SFNode('textureProperties', x3dom.nodeTypes.TextureProperties);
             this.addField_SFBool(ctx, 'scale', true);
-			this.addField_SFInt32(ctx, 'priority', 5);
-            //this.addField_SFString(ctx, 'scale', "NONE");
+			this.addField_SFInt32(ctx, 'priority', 10);
 
             this._needPerFrameUpdate = false;
             this._isCanvas = false;
+			//this._image = new Image();
+			//this._complete = false;
+			
+			//x3dom.ImageLoadManager.push( this );
         },
         {
             invalidateGLObject: function ()
@@ -144,7 +147,10 @@ x3dom.registerNodeType(
             {
                 if (fieldName == "url")
                 {
+					//x3dom.ImageLoadManager.push( this );
+					this._complete = false;
                     Array.forEach(this._parentNodes, function (app) {
+						app.nodeChanged();
                         Array.forEach(app._parentNodes, function (shape) {
                             shape._dirty.texture = true;
                         });
@@ -222,6 +228,7 @@ x3dom.registerNodeType(
                             if (url) {
                                 that._vf.url.push(url);
                                 x3dom.debug.logInfo(that._vf.url[that._vf.url.length-1]);
+								//x3dom.ImageLoadManager.push( that );
 
                                 if (childDomNode.localName === "video") {
                                     that._needPerFrameUpdate = true;
@@ -500,7 +507,21 @@ x3dom.registerNodeType(
     defineClass(x3dom.nodeTypes.X3DGeometricPropertyNode,
         function (ctx) {
             x3dom.nodeTypes.X3DTextureCoordinateNode.superClass.call(this, ctx);
-        }
+        },
+		{
+			fieldChanged: function (fieldName) {
+                Array.forEach(this._parentNodes, function (node) {
+                    node.fieldChanged("texCoord");
+                });
+            },
+
+            parentAdded: function (parent) {
+                if (parent._mesh && //parent._cf.coord.node &&
+                    parent._cf.texCoord.node !== this) {
+                    parent.fieldChanged("texCoord");
+                }
+            }
+		}	
     )
 );
 

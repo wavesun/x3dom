@@ -1,15 +1,16 @@
 package x3dom.texturing
 {
-	import x3dom.Utils;
-	import flash.display3D.*;
 	import flash.display.Bitmap;
 	import flash.display.BitmapData;
 	import flash.display.Loader;
+	import flash.display3D.*;
+	import flash.display3D.textures.*;
 	import flash.events.Event;
 	import flash.events.IOErrorEvent;
 	import flash.net.URLRequest;
 	
-	import flash.display3D.textures.*;
+	import x3dom.Debug;
+	import x3dom.Utils;
 
 	public class ImageTexture extends BaseTexture
 	{
@@ -30,7 +31,7 @@ package x3dom.texturing
 			this.defaultTexture();
 			
 			//Set URL
-			_url = url;
+			this._url = url;
 			
 			//Load Texture
 			this.loadTexture();
@@ -41,8 +42,8 @@ package x3dom.texturing
 		 */
 		private function defaultTexture() : void
 		{
-			_texture = _context3D.createTexture(2, 2, Context3DTextureFormat.BGRA, false);
-			Texture(_texture).uploadFromBitmapData( new BitmapData(2, 2, true, 0xFF000000) );
+			this._texture = _context3D.createTexture(1, 1, Context3DTextureFormat.BGRA, false);
+			Texture(_texture).uploadFromBitmapData( new BitmapData(1, 1, true, 0xFF000000) );
 		}
 		
 		/**
@@ -51,7 +52,7 @@ package x3dom.texturing
 		private function loadTexture() : void
 		{	
 			//Set ready to false
-			_ready = false;
+			this._ready = false;
 			
 			//Create new Loader
 			var loader:Loader = new Loader();
@@ -61,7 +62,7 @@ package x3dom.texturing
 			loader.contentLoaderInfo.addEventListener(IOErrorEvent.IO_ERROR, handleIOError);
 			
 			//Load image from url
-			loader.load( new URLRequest( _url ) );
+			loader.load( new URLRequest( this._url ) );
 		}
 		
 		/**
@@ -71,18 +72,18 @@ package x3dom.texturing
 		{
 			//Convert Loader to Bitmap
 			var bitmap:Bitmap = Bitmap( e.target.content );
-			
+
 			//Scale Bitmap to the next best power of two
 			bitmap = Utils.scaleBitmap(bitmap);
 			
 			//Create Texture
-			_texture = _context3D.createTexture(bitmap.width, bitmap.height, Context3DTextureFormat.BGRA, false);
+			this._texture = _context3D.createTexture(bitmap.width, bitmap.height, Context3DTextureFormat.BGRA, false);
 			
 			//Upload texture from BitmapData
-			Texture(_texture).uploadFromBitmapData(bitmap.bitmapData);
+			Texture(this._texture).uploadFromBitmapData(bitmap.bitmapData);
 			
 			//Set ready to true
-			_ready = true;
+			this._ready = true;
 			
 			//Dispatch Complete-Event
 			this.dispatchEvent( new Event( Event.COMPLETE ) );
@@ -101,7 +102,7 @@ package x3dom.texturing
 		 */
 		public function get url() : String
 		{
-			return _url;
+			return this._url;
 		}
 		
 		/**
@@ -110,10 +111,10 @@ package x3dom.texturing
 		public function set url(url:String) : void
 		{
 			//Set URL
-			_url = url;
+			this._url = url;
 			
 			//Load texture from file
-			loadTexture();
+			this.loadTexture();
 		}
 	}
 }

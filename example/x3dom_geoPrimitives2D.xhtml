@@ -1,57 +1,22 @@
-<!DOCTYPE html>
-<html>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
 <head>
-<meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
-<title>test</title>
-
-<!-- BEGIN:X3DOM -->
-<link rel="stylesheet" type="text/css" href="../../src/x3dom.css" />
-<script type="text/javascript" src="../../src/lang/Array.js"></script>
-<script type="text/javascript" src="../../src/Internals.js"></script>
-<script type="text/javascript" src="../../src/debug.js"></script>
-<script type="text/javascript" src="../../src/ImageLoadManager.js"></script>
-<script type="text/javascript" src="../../src/lang/Properties.js"></script>
-<script type="text/javascript" src="../../src/X3DCanvas.js"></script>
-<script type="text/javascript" src="../../src/Runtime.js"></script>
-<script type="text/javascript" src="../../src/Main.js"></script>
-<script type="text/javascript" src="../../src/gfx_webgl.js"></script>
-<script type="text/javascript" src="../../src/gfx_flash.js"></script>
-<script type="text/javascript" src="../../src/X3DDocument.js"></script>
-<script type="text/javascript" src="../../src/MatrixMixer.js"></script>
-<script type="text/javascript" src="../../src/Viewarea.js"></script>
-<script type="text/javascript" src="../../src/Mesh.js"></script>
-<script type="text/javascript" src="../../src/fields.js"></script>
-<script type="text/javascript" src="../../src/nodes/NodeNameSpace.js"></script>
-<script type="text/javascript" src="../../src/nodes/Core.js"></script>
-<script type="text/javascript" src="../../src/nodes/Grouping.js"></script>
-<script type="text/javascript" src="../../src/nodes/Bindable.js"></script>
-<script type="text/javascript" src="../../src/nodes/Rendering.js"></script>
-<script type="text/javascript" src="../../src/nodes/Shape.js"></script>
-<script type="text/javascript" src="../../src/nodes/Lighting.js"></script>
-<script type="text/javascript" src="../../src/nodes/Followers.js"></script>
-<script type="text/javascript" src="../../src/nodes/Interpolation.js"></script>
-<script type="text/javascript" src="../../src/nodes/Time.js"></script>
-<script type="text/javascript" src="../../src/nodes/Networking.js"></script>
-<script type="text/javascript" src="../../src/nodes/EnvironmentalEffects.js"></script>
-<script type="text/javascript" src="../../src/nodes/Navigation.js"></script>
-<script type="text/javascript" src="../../src/nodes/Text.js"></script>
-<script type="text/javascript" src="../../src/nodes/Sound.js"></script>
-<script type="text/javascript" src="../../src/nodes/Texturing.js"></script>
-<script type="text/javascript" src="../../src/nodes/Shaders.js"></script>
-<script type="text/javascript" src="../../src/nodes/Geometry3D.js"></script>
-<script type="text/javascript" src="../../src/nodes/Geometry2D.js"></script>
-<script type="text/javascript" src="../../src/nodes/Geospatial.js"></script>
-<!-- END:X3DOM -->
-
-<!-- BEGIN:TEST -->
-<script type="text/javascript" src="media/js/tests.js"></script>
-<!-- END:TEST -->
-
+        <meta http-equiv="X-UA-Compatible" content="chrome=1" />
+		<meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
+		<title>Inline HTML Reflection</title>
+        <link rel="stylesheet" type="text/css" href="x3dom.css" />
+        <script type="text/javascript" src="../dist/x3dom.js"></script>
+        <script type="text/javascript" src="../dist/components/Geometry2D.js"></script><!-- include the component for 2D Primitivs-->
 </head>
        
 <body>
-	    <x3d id="rotate-box" width='1000px' height='700px'>
-			<scene>
+	<h1>2D Primitivs</h1>
+    <p>Arc2D, ArcClose2D (“PIE”/”CHORD”), Circle2D, Disk2D, Polyline2D, Polypoint2D, Rectangle2D, TriangleSet2D.</p>
+    <p>You can use it with include the <a href="http://x3dom.org/docs/dev/components.html">Geometry2D.js component</a></p>
+    
+	     <X3D id="rotate-box" xmlns="http://www.web3d.org/specifications/x3d-namespace" width='1000px' height='700px'>
+         <Scene>
             	<Background skyColor='0 0 0'></Background>
                 <transform translation="-4 2 0">
                   <shape>
@@ -125,7 +90,7 @@
                       <material id="colorRectangle" diffuseColor='yellow'></material>
                       <imageTexture url='media/img/igd_main.png'></imageTexture>
                     </appearance>
-                    <Rectangle2D id="testRectangle" size='1 1' onmouseover="testRectangle();"></Rectangle2D>
+                    <Rectangle2D id="testRectangle" size='1 1' subdivision='1 1' onmouseover="testRectangle();"></Rectangle2D>
                   </shape>
                 </transform>
                 
@@ -138,8 +103,8 @@
                     <TriangleSet2D id="testTriangleSet" vertices ='0 0, 0.5 0.5, 1 -0.5, 0 0, -0.5 -0.5, -0.5 0.5' onmouseover="testTriangleSet();"></TriangleSet2D>
                   </shape>
                 </transform>
-			</scene>
-        </x3d>
+			</Scene>
+        </X3D>
         
 <script type="text/javascript" >
 
@@ -186,6 +151,7 @@
         };
 		var testRectangle = function (event) {
 			document.getElementById('testRectangle').setAttribute('size', '0.5 0.5');
+			document.getElementById('testRectangle').setAttribute('subdivision', '2 2');
 			document.getElementById('colorRectangle').setAttribute('emissiveColor', '1 0 0');
         };
 		var testTriangleSet = function (event) {

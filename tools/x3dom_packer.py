@@ -26,7 +26,7 @@ version_string = "/** X3DOM Runtime, http://www.x3dom.org */"
 
 tools_path = os.path.abspath(__file__)
 tools_path = os.path.dirname(tools_path)
-os.chdir(os.path.abspath(tools_path + "/../src"))
+#os.chdir(os.path.abspath(tools_path + "/../src"))
 
 class packer():
 
@@ -35,7 +35,7 @@ class packer():
     
     version_out = "version.js"
     
-    print "Using Version: '" + version_in + "' >> '" + version_out + "'"
+    print "Generating version.js"
     
     # Read the base-version from the VERSION file
     if os.path.isfile(version_in):
@@ -57,10 +57,14 @@ class packer():
     except:
       git_revision = 0
       git_date = 0
-    
-    print "  Version  '", version, "'"
-    print "  Revision '", git_revision, "'"
-    print "  Date     '", git_date, "'"
+      print "  WARNING:  Cannot find git executable"
+      
+    print "  Input    ", os.path.abspath(version_in)
+    print "  Output   ", os.path.abspath(version_out)
+    print "  Version  ", version
+    print "  Revision ", git_revision
+    print "  Date     ", git_date
+    print ""
     
     # Write the version and revision to file
     version_js_file = open(version_out, "w")
@@ -72,42 +76,51 @@ class packer():
     return version_out
   
   # Packaging
-  def build(self, input_files, output_file, packaging_module):
-
-    # find the VERSION file
-    if os.path.isfile("VERSION"):
-      version_file_name = "VERSION"
-    else:
-      print "FATAL: Cannot find any VERSION file"
-      sys.exit(0)
+  def build(self, input_files, output_file, packaging_module, include_version=True):
     
-    # parse file & generate version.js
-    version_out = self.generate_version_file(version_file_name);
+    if include_version == True:
+        # find the VERSION file
+        if os.path.isfile("VERSION"):
+            version_file_name = "VERSION"
+        elif os.path.isfile("src/VERSION"):
+            version_file_name = "src/VERSION"
+        else:
+          print "FATAL: Cannot find any VERSION file"
+          sys.exit(0)
     
-    # Add the version.js to the list of input files
-    input_files.append(version_out)
+        # parse file & generate version.js
+        version_out = self.generate_version_file(version_file_name);
+    
+        # Add the version.js to the list of input files
+        input_files.append(version_out)
 
     concatenated_file = ""
     in_len = 0
     out_len = 0
     
+    # Merging files
+    print "Packing Files"
     for filename in input_files:
       try:
+        print "  " + os.path.abspath(filename)
         f = open(filename, 'r')
         concatenated_file += f.read()
         f.close()
       except:
         print "Could not open input file '%s'. Skipping" % filename    
       concatenated_file += "\n"
+    print ""
      
     outpath = os.path.dirname(os.path.abspath(output_file))
     
     if not os.access(outpath, os.F_OK):
-      print "Create Dir: ", outpath
+      print "Create Dir ", outpath
       os.mkdir(outpath)
     
     # Packaging
-    print "Using packer: '" + packaging_module + "'"
+    print "Packaging"
+    print "  Algo    " + packaging_module
+    print "  Output  " + os.path.abspath(output_file)
     
     # JSMIN
     if packaging_module == "jsmin":
@@ -146,7 +159,7 @@ class packer():
       #Popen(["java", "-jar", "tools/compiler.jar", "--js_output_file=" + output_file] + files)
     
     # NONE
-    elif packaging_module == None:
+    elif packaging_module == 'none':
       outfile = open(output_file, 'w')
       outfile.write(version_string)
       outfile.write(concatenated_file)
@@ -155,12 +168,13 @@ class packer():
     # Output some stats
     in_len = len(concatenated_file)    
     ratio = float(out_len) / float(in_len);
-    print "  packed: %s to %s, ratio is %s" % (in_len, out_len, ratio)
+    print "  Packed  %s -> %s" % (in_len, out_len)
+    print "  Ratio   %s" % (ratio)
 
 if __name__ == '__main__':
     parser = OptionParser(usage)
     
-    parser.add_option("-a", "--algo",       type="string",  dest="algo",      help='The algorithm to use. [jsmin, jspacker, closure]',    default="jsmin")
+    parser.add_option("-a", "--algo",       type="string",  dest="algo",      help='The algorithm to use. [jsmin, jspacker, closure, none]',    default="jsmin")
     parser.add_option("-o", "--outfile",    type="string",  dest="outfile",   help='The name of the output file.')
     
     (options, input_files) = parser.parse_args()
