@@ -981,6 +981,69 @@ x3dom.fields.SFMatrix4f.prototype.setValueByStr = function(str) {
 };
 
 
+///////////////////////////////////////////////////////////////////////////////
+
+/** SFMatrix4f constructor.
+    @class Represents a 4x4 matrice
+  */
+x3dom.SFMatrix4f = function()
+{
+  // view or typed array
+  if(arguments[0] instanceof math.Float32Array)
+    this._array = arguments[0];
+  
+  // init
+  else
+    this._array = math.mat4x4.create(arguments);
+};
+
+// FOR REDESIGN
+x3dom.SFMatrix4f.from_old = function(old)
+{
+  return new x3dom.SFMatrix4f(
+    old._00, old._01, old._02, old._03,
+    old._10, old._11, old._12, old._13,
+    old._20, old._21, old._22, old._23,
+    old._30, old._31, old._32, old._33
+  );
+};
+// FOR REDESIGN
+
+x3dom.SFMatrix4f.prototype = 
+{
+  // FOR REDESIGN
+  to_old : function()
+  {
+    return new x3dom.fields.SFMatrix4f(
+      this._array[00], this._array[01], this._array[02], this._array[03], 
+      this._array[04], this._array[05], this._array[06], this._array[07], 
+      this._array[08], this._array[09], this._array[10], this._array[11], 
+      this._array[12], this._array[13], this._array[14], this._array[15]
+    );
+  },
+  // FOR REDESIGN
+  
+  toString : function() { return math.mat4x4.toString(this._array); },
+  copy : function() { return new x3dom.SFMatrix4f(math.mat4x4.copy(this._array)); },
+
+  mult : function(mat) { math.mat4x4.mult(this._array, mat._array, this._array); return this; },
+  
+  identity : function() { math.mat4x4.identity(this._array); return this; },
+  
+  translate : function(vec) { math.mat4x4.translate(this._array, vec._array); return this; },
+  setTranslation : function(vec) { math.mat4x4.setTranslation(this._array, vec._array); return this; },
+  
+  rotateX : function(angle) { math.mat4x4.rotateX(this._array, angle); return this; },
+  rotateY : function(angle) { math.mat4x4.rotateY(this._array, angle); return this; },
+  rotateZ : function(angle) { math.mat4x4.rotateZ(this._array, angle); return this; },
+  
+  transpose : function() { math.mat4x4.transpose(this._array); return this; },
+  invert : function() { math.mat4x4.inverse(this._array); return this; }
+};
+
+///////////////////////////////////////////////////////////////////////////////
+
+
 /** SFVec2f constructor.
     @class Represents a SFVec2f
   */
@@ -1067,165 +1130,6 @@ x3dom.fields.SFVec2f.prototype.setValueByStr = function(str) {
     this.y = +m[2];
     return this;
 };
-
-
-///////////////////////////////////////////////////////////////////////////////
-
-/** SFVec3f constructor.
-    @class Represents a SFVec3f
-  */
-x3dom.SFVec3f = function()
-{
-  // view or typed array
-  if(arguments[0] instanceof math.Float32Array)
-    this._array = arguments[0];
-  
-  // init
-  else
-    this._array = math.vec3.create(arguments);
-};
-
-x3dom.SFVec3f.prototype = 
-{
-  toString : function()
-  {
-    return "[" + this._array[0] + " " + this._array[1] + " " + this._array[2] + "]";
-  },
-  
-  negate : function() { math.vec3.negate(this._array); },
-  add : function(right, result) { math.vec3.add(this._array, right._array, result._array); },
-  subtract : function(right, result) { math.vec3.subtract(this._array, right._array, result._array); },
-  dot : function(right) { return math.vec3.dot(this._array, right._array); },
-  cross : function(right, result) { math.vec3.cross(this._array, right._array, result._array); },
-//  reflect = function (n)
-  length : function() { return math.vec3.length(this._array); },
-  normalize : function() { math.vec3.normalize(this._array); },
-//  multComponents = function (that)
-//  multiply = function (n)
-//  divide = function (n)
-};
-
-/** MFVec3f constructor.
-    @class Represents a MFVec3f
-  */
-x3dom.MFVec3f = function()
-{
-  // empty
-  if(arguments.length == 0)
-  {
-    this._array = null;
-    this.length = 0;
-  }
-  
-  // create array
-  else
-  {
-    // single value
-    if(arguments.length == 1)
-    {
-      // reference of a typed array
-      if(arguments[0] instanceof math.Float32Array)
-        this._array = arguments[0];
-      
-      // simple array or size
-      else
-        this._array = new math.Float32Array(arguments[0]);
-    }
-    
-    // multiple values
-    else
-    {
-      this._array = new math.Float32Array(arguments.length);
-      
-      for(var i=0; i<arguments.length; ++i)
-        this._array[i] = arguments[i];
-    }
-    
-    this.length = this._array.length / 3;
-  }
-};
-
-x3dom.MFVec3f.prototype = 
-{
-  toString : function()
-  {
-    var temp = "";
-    
-    for(var i=0; i<this.length; ++i)
-      temp += "[" + this._array[i*3] + " " + this._array[i*3+1] + " " + this._array[i*3+2] + "] ";
-      
-    return temp;
-  },
-  
-  get : function(index)
-  {
-    return new x3dom.SFVec3f(this._array.subarray(index*3, (index+1)*3));
-  },
-  
-  push : function(value)
-  {
-    if((value instanceof Array) || (value instanceof math.Float32Array))
-      var source = value;
-    else if((value instanceof x3dom.SFVec3f) || (value instanceof x3dom.MFVec3f))
-      var source = value._array;
-
-    var source_length = source.length + (source.length % 3);
-    var temp = new math.Float32Array(this._array.length + source_length);
-    
-    temp.set(this._array);
-    temp.set(source, this._array.length);
-    
-    this._array = temp;
-    this.length += source_length / 3;
-  },
-  
-  pop : function()
-  {
-    var pos = this._array.length - 3;
-    
-    var temp = new x3dom.SFVec3f(
-      this._array[pos],
-      this._array[pos+1],
-      this._array[pos+2]);
-      
-    this._array = this._array.subarray(0, pos);
-    this.length--;
-      
-    return temp;
-  },
-  
-  shift : function()
-  {
-    var temp = new x3dom.SFVec3f(
-      this._array[0],
-      this._array[1],
-      this._array[2]);
-      
-    this._array = this._array.subarray(3, this._array.length);
-    this.length--;
-      
-    return temp;
-  },
-  
-  unshift : function(value)
-  {
-    if((value instanceof Array) || (value instanceof math.Float32Array))
-      var source = value;
-    else if((value instanceof x3dom.SFVec3f) || (value instanceof x3dom.MFVec3f))
-      var source = value._array;
-
-    var source_length = source.length + (source.length % 3);
-    var temp = new math.Float32Array(this._array.length + source_length);
-    
-    temp.set(source);
-    temp.set(this._array, source_length);
-    
-    this._array = temp;
-    this.length += source_length / 3;
-  }
-}
-
-///////////////////////////////////////////////////////////////////////////////
 
 /** SFVec3f constructor.
     @class Represents a SFVec3f
@@ -1355,6 +1259,182 @@ x3dom.fields.SFVec3f.prototype.setValueByStr = function(str) {
     }
     return this;
 };
+
+///////////////////////////////////////////////////////////////////////////////
+
+/** SFVec3f constructor.
+    @class Represents a SFVec3f
+  */
+x3dom.SFVec3f = function()
+{
+  // view or typed array
+  if(arguments[0] instanceof math.Float32Array)
+    this._array = arguments[0];
+  
+  // init
+  else
+    this._array = math.vec3.create(arguments);
+};
+
+// FOR REDESIGN
+x3dom.SFVec3f.from_old = function(old)
+{
+  return new x3dom.SFVec3f(old.x, old.y, old.z);
+};
+// FOR REDESIGN
+
+x3dom.SFVec3f.prototype = 
+{
+  // FOR REDESIGN
+  to_old : function()
+  {
+    return new x3dom.fields.SFVec3f(this._array[00], this._array[01], this._array[02]);
+  },
+  // FOR REDESIGN
+  
+  toString : function() { return math.vec3.toString(this._array); },
+  copy : function() { return new x3dom.SFVec3f(math.vec3.copy(this._array)); },
+  
+  set : function(x, y, z) { this._array[0] = x; this._array[1] = y; this._array[2] = z; },
+  
+  negate : function() { math.vec3.negate(this._array); return this; },
+  add : function(right) { math.vec3.add(this._array, right._array, this._array); return this; },
+  subtract : function(right) { math.vec3.subtract(this._array, right._array, this._array); return this; },
+  dot : function(right) { return math.vec3.dot(this._array, right._array); },
+  cross : function(right) { math.vec3.cross(this._array, right._array, this._array); return this; },
+//  reflect = function (n)
+  length : function() { return math.vec3.length(this._array); },
+  normalize : function() { math.vec3.normalize(this._array); },
+//  multComponents = function (that)
+  multiply : function(factor) { math.vec3.scale(this._array, factor, this._array); return this; },
+//  divide = function (n)
+};
+
+x3dom.SFVec3f.ZERO = new x3dom.SFVec3f(0,0,0);
+
+///////////////////////////////////////////////////////////////////////////////
+
+/** MFVec3f constructor.
+    @class Represents a MFVec3f
+  */
+x3dom.MFVec3f = function()
+{
+  // empty
+  if(arguments.length == 0)
+  {
+    this._array = null;
+    this.length = 0;
+  }
+  
+  // create array
+  else
+  {
+    // single value
+    if(arguments.length == 1)
+    {
+      // reference of a typed array
+      if(arguments[0] instanceof math.Float32Array)
+        this._array = arguments[0];
+      
+      // simple array or size
+      else
+        this._array = new math.Float32Array(arguments[0]);
+    }
+    
+    // multiple values
+    else
+    {
+      this._array = new math.Float32Array(arguments.length);
+      
+      for(var i=0; i<arguments.length; ++i)
+        this._array[i] = arguments[i];
+    }
+    
+    this.length = this._array.length / 3;
+  }
+};
+
+x3dom.MFVec3f.prototype = 
+{
+  toString : function()
+  {
+    var temp = "";
+    
+    for(var i=0; i<this.length; ++i)
+      temp += "[" + this._array[i*3] + " " + this._array[i*3+1] + " " + this._array[i*3+2] + "] ";
+      
+    return temp;
+  },
+  
+  get : function(index)
+  {
+    return new x3dom.SFVec3f(this._array.subarray(index*3, (index+1)*3));
+  },
+  
+  push : function(value)
+  {
+    if((value instanceof Array) || (value instanceof math.Float32Array))
+      var source = value;
+    else if((value instanceof x3dom.SFVec3f) || (value instanceof x3dom.MFVec3f))
+      var source = value._array;
+
+    var source_length = source.length + (source.length % 3);
+    var temp = new math.Float32Array(this._array.length + source_length);
+    
+    temp.set(this._array);
+    temp.set(source, this._array.length);
+    
+    this._array = temp;
+    this.length += source_length / 3;
+  },
+  
+  pop : function()
+  {
+    var pos = this._array.length - 3;
+    
+    var temp = new x3dom.SFVec3f(
+      this._array[pos],
+      this._array[pos+1],
+      this._array[pos+2]);
+      
+    this._array = this._array.subarray(0, pos);
+    this.length--;
+      
+    return temp;
+  },
+  
+  shift : function()
+  {
+    var temp = new x3dom.SFVec3f(
+      this._array[0],
+      this._array[1],
+      this._array[2]);
+      
+    this._array = this._array.subarray(3, this._array.length);
+    this.length--;
+      
+    return temp;
+  },
+  
+  unshift : function(value)
+  {
+    if((value instanceof Array) || (value instanceof math.Float32Array))
+      var source = value;
+    else if((value instanceof x3dom.SFVec3f) || (value instanceof x3dom.MFVec3f))
+      var source = value._array;
+
+    var source_length = source.length + (source.length % 3);
+    var temp = new math.Float32Array(this._array.length + source_length);
+    
+    temp.set(source);
+    temp.set(this._array, source_length);
+    
+    this._array = temp;
+    this.length += source_length / 3;
+  }
+}
+
+///////////////////////////////////////////////////////////////////////////////
 
 
 /** Quaternion constructor.

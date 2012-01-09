@@ -113,6 +113,16 @@ math.vec3 =
     return vec;
   },
   
+  copy : function(vec)
+  {
+    return this.create(vec);
+  },
+  
+  toString : function(vec)
+  {
+    return "[" + vec[0].toFixed(6) + " " + vec[1].toFixed(6) + " " + vec[2].toFixed(6) + "]";
+  },
+  
   negate : function(vec)
   {
     vec[0] = -vec[0],
@@ -178,6 +188,13 @@ math.vec3 =
     vec[0] = x * n,
     vec[1] = y * n,
     vec[2] = z * n;
+  },
+  
+  scale : function(vec, factor, result)
+  {
+    result[0] = vec[0] * factor;
+    result[1] = vec[1] * factor;
+    result[2] = vec[2] * factor;
   }
 };
 
@@ -201,7 +218,7 @@ math.vec4 =
     
     return vec;
   },
-  
+   
   negate : function(vec)
   {
     vec[0] = -vec[0],
@@ -275,7 +292,7 @@ math.mat3x3 =
 /** The 4x4 Matrix */
 math.mat4x4 = 
 {
-  create : function()
+  create : function(arg)
   {
     var mat = new math.Float32Array(16);
     
@@ -317,6 +334,19 @@ math.mat4x4 =
       mat[i] = temp[i];
   },
   
+  copy : function(mat)
+  {
+    return this.create(mat);
+  },
+  
+  toString : function(mat)
+  {
+    return "| " + mat[00].toFixed(6) + " " + mat[01].toFixed(6) + " " + mat[02].toFixed(6) + " " + mat[03].toFixed(6) + " |\n" +
+           "| " + mat[04].toFixed(6) + " " + mat[05].toFixed(6) + " " + mat[06].toFixed(6) + " " + mat[07].toFixed(6) + " |\n" +
+           "| " + mat[08].toFixed(6) + " " + mat[09].toFixed(6) + " " + mat[10].toFixed(6) + " " + mat[11].toFixed(6) + " |\n" +
+           "| " + mat[12].toFixed(6) + " " + mat[13].toFixed(6) + " " + mat[14].toFixed(6) + " " + mat[15].toFixed(6) + " |";
+  },
+  
   add : function(left, right, result)
   {
     for(var i=0; i<16; ++i)
@@ -329,27 +359,31 @@ math.mat4x4 =
         l10 =  left[04], l11 =  left[05], l12 =  left[06], l13 =  left[07],
         l20 =  left[08], l21 =  left[09], l22 =  left[10], l23 =  left[11],
         l30 =  left[12], l31 =  left[13], l32 =  left[14], l33 =  left[15],
+        
         r00 = right[00], r01 = right[01], r02 = right[02], r03 = right[03],
         r10 = right[04], r11 = right[05], r12 = right[06], r13 = right[07],
         r20 = right[08], r21 = right[09], r22 = right[10], r23 = right[11],
         r30 = right[12], r31 = right[13], r32 = right[14], r33 = right[15];
-
-    result[00] = l00 * r00 + l10 * r01 + l20 * r02 + l30 * r03, 
-    result[01] = l01 * r00 + l11 * r01 + l21 * r02 + l31 * r03, 
-    result[02] = l02 * r00 + l12 * r01 + l22 * r02 + l32 * r03, 
-    result[03] = l03 * r00 + l13 * r01 + l23 * r02 + l33 * r03, 
-    result[04] = l00 * r10 + l10 * r11 + l20 * r12 + l30 * r13, 
-    result[05] = l01 * r10 + l11 * r11 + l21 * r12 + l31 * r13, 
-    result[06] = l02 * r10 + l12 * r11 + l22 * r12 + l32 * r13, 
-    result[07] = l03 * r10 + l13 * r11 + l23 * r12 + l33 * r13, 
-    result[08] = l00 * r20 + l10 * r21 + l20 * r22 + l30 * r23, 
-    result[09] = l01 * r20 + l11 * r21 + l21 * r22 + l31 * r23, 
-    result[10] = l02 * r20 + l12 * r21 + l22 * r22 + l32 * r23, 
-    result[11] = l03 * r20 + l13 * r21 + l23 * r22 + l33 * r23, 
-    result[12] = l00 * r30 + l10 * r31 + l20 * r32 + l30 * r33, 
-    result[13] = l01 * r30 + l11 * r31 + l21 * r32 + l31 * r33, 
-    result[14] = l02 * r30 + l12 * r31 + l22 * r32 + l32 * r33,
-    result[15] = l03 * r30 + l13 * r31 + l23 * r32 + l33 * r33;
+        
+    result[00] = l00 * r00 + l01 * r10 + l02 * r20 + l03 * r30, 
+    result[01] = l00 * r01 + l01 * r11 + l02 * r21 + l03 * r31, 
+    result[02] = l00 * r02 + l01 * r12 + l02 * r22 + l03 * r32, 
+    result[03] = l00 * r03 + l01 * r13 + l02 * r23 + l03 * r33, 
+    
+    result[04] = l10 * r00 + l11 * r10 + l12 * r20 + l13 * r30, 
+    result[05] = l10 * r01 + l11 * r11 + l12 * r21 + l13 * r31, 
+    result[06] = l10 * r02 + l11 * r12 + l12 * r22 + l13 * r32, 
+    result[07] = l10 * r03 + l11 * r13 + l12 * r23 + l13 * r33, 
+    
+    result[08] = l20 * r00 + l21 * r10 + l22 * r20 + l23 * r30, 
+    result[09] = l20 * r01 + l21 * r11 + l22 * r21 + l23 * r31, 
+    result[10] = l20 * r02 + l21 * r12 + l22 * r22 + l23 * r32, 
+    result[11] = l20 * r03 + l21 * r13 + l22 * r23 + l23 * r33, 
+    
+    result[12] = l30 * r00 + l31 * r10 + l32 * r20 + l33 * r30, 
+    result[13] = l30 * r01 + l31 * r11 + l32 * r21 + l33 * r31, 
+    result[14] = l30 * r02 + l31 * r12 + l32 * r22 + l33 * r32, 
+    result[15] = l30 * r03 + l31 * r13 + l32 * r23 + l33 * r33;
   },
   
   transpose : function(mat)
@@ -419,14 +453,17 @@ math.mat4x4 =
     mat[01] = (-m01 * d11 + m02 * d10 - m03 * d09) * det_inv;
     mat[02] = ( m31 * d05 - m32 * d04 + m33 * d03) * det_inv;
     mat[03] = (-m21 * d05 + m22 * d04 - m23 * d03) * det_inv;
+    
     mat[04] = (-m10 * d11 + m12 * d08 - m13 * d07) * det_inv;
     mat[05] = ( m00 * d11 - m02 * d08 + m03 * d07) * det_inv;
     mat[06] = (-m30 * d05 + m32 * d02 - m33 * d01) * det_inv;
     mat[07] = ( m20 * d05 - m22 * d02 + m23 * d01) * det_inv;
+    
     mat[08] = ( m10 * d10 - m11 * d08 + m13 * d06) * det_inv;
     mat[09] = (-m00 * d10 + m01 * d08 - m03 * d06) * det_inv;
     mat[10] = ( m30 * d04 - m31 * d02 + m33 * d00) * det_inv;
     mat[11] = (-m20 * d04 + m21 * d02 - m23 * d00) * det_inv;
+    
     mat[12] = (-m10 * d09 + m11 * d07 - m12 * d06) * det_inv;
     mat[13] = ( m00 * d09 - m01 * d07 + m02 * d06) * det_inv;
     mat[14] = (-m30 * d03 + m31 * d01 - m32 * d00) * det_inv;
@@ -435,16 +472,105 @@ math.mat4x4 =
   
   translate : function(mat, vec)
   {
-    mat[03] = vec[0];
-    mat[13] = vec[1];
-    mat[23] = vec[2];
+    var x = vec[0],
+        y = vec[1],
+        z = vec[2];
+    
+    mat[03] = mat[00] * x + mat[01] * y + mat[02] * z + mat[03];
+    mat[07] = mat[04] * x + mat[05] * y + mat[06] * z + mat[07];
+    mat[11] = mat[08] * x + mat[09] * y + mat[10] * z + mat[11];
+    mat[15] = mat[12] * x + mat[13] * y + mat[14] * z + mat[15];
   },
-
+  
+  setTranslation : function(mat, vec)
+  {
+    var x = vec[0],
+        y = vec[1],
+        z = vec[2];
+    
+    mat[03] = x;
+    mat[07] = y;
+    mat[11] = z;
+  },
+  
   scale : function(mat, vec)
   {
-    mat[00] = vec[0];
-    mat[11] = vec[1];
-    mat[22] = vec[2];
+    var x = vec[0],
+        y = vec[1],
+        z = vec[2];
+
+    mat[00] *= x, 
+    mat[01] *= x, 
+    mat[02] *= x, 
+    mat[03] *= x, 
+    
+    mat[04] *= y, 
+    mat[05] *= y, 
+    mat[06] *= y, 
+    mat[07] *= y, 
+    
+    mat[08] *= z, 
+    mat[09] *= z, 
+    mat[10] *= z, 
+    mat[11] *= z;
+  },
+  
+  rotateX : function(mat, angle)
+  {
+    var c = Math.cos(angle);
+    var s = Math.sin(angle);
+    
+    var m01 = mat[01], m02 = mat[02],
+        m11 = mat[05], m12 = mat[06],
+        m21 = mat[09], m22 = mat[10],
+        m31 = mat[13], m32 = mat[14];
+
+    mat[01] = m01 * c + m02 * -s, 
+    mat[02] = m01 * s + m02 *  c, 
+    mat[05] = m11 * c + m12 * -s, 
+    mat[06] = m11 * s + m12 *  c, 
+    mat[09] = m21 * c + m22 * -s, 
+    mat[10] = m21 * s + m22 *  c, 
+    mat[13] = m31 * c + m32 * -s, 
+    mat[14] = m31 * s + m32 *  c;
+  },
+  
+  rotateY : function(mat, angle)
+  {
+    var c = Math.cos(angle);
+    var s = Math.sin(angle);
+    var m00 = mat[00], m02 = mat[02],
+        m10 = mat[04], m12 = mat[06],
+        m20 = mat[08], m22 = mat[10],
+        m30 = mat[12], m32 = mat[14];
+
+    mat[00] = m00 *  c + m02 * s, 
+    mat[02] = m00 * -s + m02 * c, 
+    mat[04] = m10 *  c + m12 * s, 
+    mat[06] = m10 * -s + m12 * c, 
+    mat[08] = m20 *  c + m22 * s, 
+    mat[10] = m20 * -s + m22 * c, 
+    mat[12] = m30 *  c + m32 * s, 
+    mat[14] = m30 * -s + m32 * c;
+  },
+  
+  rotateZ : function(mat, angle)
+  {
+    var c = Math.cos(angle);
+    var s = Math.sin(angle);
+    var m00 = mat[00], m01 = mat[01],
+        m10 = mat[04], m11 = mat[05],
+        m20 = mat[08], m21 = mat[09],
+        m30 = mat[12], m31 = mat[13];
+
+    mat[00] = m00 * c + m01 * -s, 
+    mat[01] = m00 * s + m01 *  c,
+    mat[04] = m10 * c + m11 * -s, 
+    mat[05] = m10 * s + m11 *  c,
+    mat[08] = m20 * c + m21 * -s, 
+    mat[09] = m20 * s + m21 *  c,
+    mat[12] = m30 * c + m31 * -s, 
+    mat[13] = m30 * s + m31 *  c;
   },
   
   lookAt : function(eye, at, up, mat)
