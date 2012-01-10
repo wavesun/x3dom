@@ -1025,6 +1025,7 @@ x3dom.SFMatrix4f.prototype =
   
   toString : function() { return math.mat4x4.toString(this._array); },
   copy : function() { return new x3dom.SFMatrix4f(math.mat4x4.copy(this._array)); },
+  get : function(x,y) { return this._array[(y*4)+x]; },
 
   mult : function(mat) { math.mat4x4.mult(this._array, mat._array, this._array); return this; },
   
@@ -1040,6 +1041,9 @@ x3dom.SFMatrix4f.prototype =
   transpose : function() { math.mat4x4.transpose(this._array); return this; },
   invert : function() { math.mat4x4.inverse(this._array); return this; }
 };
+
+x3dom.SFMatrix4f.ZERO     = new x3dom.SFMatrix4f(0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0);
+x3dom.SFMatrix4f.IDENTITY = new x3dom.SFMatrix4f(1,0,0,0, 0,1,0,0, 0,0,1,0, 0,0,0,1);
 
 ///////////////////////////////////////////////////////////////////////////////
 

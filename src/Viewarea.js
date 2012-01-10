@@ -24,8 +24,8 @@ x3dom.Viewarea = function (document, scene) {
         lastClickObj: null
     };
 
-    this._rotMat = x3dom.fields.SFMatrix4f.identity();
-    this._transMat = x3dom.fields.SFMatrix4f.identity();
+    this._rotMat   = x3dom.SFMatrix4f.IDENTITY.copy();
+    this._transMat = x3dom.SFMatrix4f.IDENTITY.copy();
     this._movement = x3dom.SFVec3f.ZERO.copy();
 
     this._needNavigationMatrixUpdate = true;
@@ -33,7 +33,8 @@ x3dom.Viewarea = function (document, scene) {
 
     this._pitch = 0;
     this._yaw = 0;
-    this._eyePos = new x3dom.fields.SFVec3f(0, 0, 0);
+    this._eyePos = x3dom.SFVec3f.ZERO.copy();
+    this._from = x3dom.SFVec3f.ZERO.copy();
 
     this._width = 400;
     this._height = 300;
@@ -112,7 +113,7 @@ x3dom.Viewarea.prototype.navigateTo = function(timeStamp)
         }
 
         // get current view matrix
-        var currViewMat = this.getViewMatrix();
+        var currViewMat = x3dom.SFMatrix4f.from_old(this.getViewMatrix());
         var dist = 0;
 
         // check if forwards or backwards (on right button)
@@ -127,20 +128,20 @@ x3dom.Viewarea.prototype.navigateTo = function(timeStamp)
             this._needNavigationMatrixUpdate = false;
             
             // reset examine matrices to identity
-            this._rotMat = x3dom.fields.SFMatrix4f.identity();
-            this._transMat = x3dom.fields.SFMatrix4f.identity();
+            this._rotMat.identity();
+            this._transMat.identity();
             this._movement.set(0,0,0);
 
             var angleX = 0;
-            var angleY = Math.asin(currViewMat._02);
+            var angleY = Math.asin(currViewMat.get(0,2));
             var C = Math.cos(angleY);
             
             if (Math.abs(C) > 0.0001) {
-                angleX = Math.atan2(-currViewMat._12 / C, currViewMat._22 / C);
+                angleX = Math.atan2(-currViewMat.get(1,2) / C, currViewMat.get(2,2) / C);
             }
 
             // too many inversions here can lead to distortions
-            this._flyMat = currViewMat.inverse();
+            this._flyMat = currViewMat.copy().invert().to_old();
             
             this._from = this._flyMat.e3();
             this._at = this._from.subtract(this._flyMat.e2());
@@ -381,22 +382,26 @@ x3dom.Viewarea.prototype.animateTo = function(target, prev, dur)
 
     if (navi._vf.transitionType[0].toLowerCase() !== "teleport" && navi.getType() !== "game")
     {
-        if (prev && x3dom.isa(prev, x3dom.nodeTypes.Viewpoint)) {
+        if (prev && x3dom.isa(prev, x3dom.nodeTypes.Viewpoint))
+        {
             prev = prev.getCurrentTransform().mult(prev.getViewMatrix()).
-                         mult(this._transMat).mult(this._rotMat);
+                         mult(this._transMat.to_old()).mult(this._rotMat.to_old());
         }
-        else {
+        else
+        {
             //prev = x3dom.fields.SFMatrix4f.identity();
             return;
         }
 
         this._mixer._beginTime = this._lastTS;
 
-        if (arguments.length >= 3) {
+        if (arguments.length >= 3)
+        {
             // for lookAt to assure travel speed of 1 m/s
             this._mixer._endTime = this._lastTS + dur;
         }
-        else {
+        else
+        {
             this._mixer._endTime = this._lastTS + navi._vf.transitionTime;
         }
 
@@ -408,8 +413,8 @@ x3dom.Viewarea.prototype.animateTo = function(target, prev, dur)
         this._scene.getViewpoint().setView(target);
     }
 
-    this._rotMat = x3dom.fields.SFMatrix4f.identity();
-    this._transMat = x3dom.fields.SFMatrix4f.identity();
+    this._rotMat.identity();
+    this._transMat.identity();
     this._movement.set(0,0,0);
     
     this._needNavigationMatrixUpdate = true;
@@ -437,9 +442,10 @@ x3dom.Viewarea.prototype.getViewpointMatrix = function () {
 };
 
 x3dom.Viewarea.prototype.getViewMatrix = function () {
-    return this.getViewpointMatrix().
-            mult(this._transMat).
-            mult(this._rotMat);
+
+    var view = x3dom.SFMatrix4f.from_old(this.getViewpointMatrix());
+    
+    return view.copy().mult(this._transMat).mult(this._rotMat).to_old();
 };
 
 x3dom.Viewarea.prototype.getLightMatrix = function ()
@@ -580,8 +586,8 @@ x3dom.Viewarea.prototype.resetView = function()
         this._scene.getViewpoint().resetView();
     }
 
-    this._rotMat = x3dom.fields.SFMatrix4f.identity();
-    this._transMat = x3dom.fields.SFMatrix4f.identity();
+    this._rotMat.identity();
+    this._transMat.identity();
     this._movement.set(0,0,0);
     
     this._needNavigationMatrixUpdate = true;
@@ -932,7 +938,7 @@ x3dom.Viewarea.prototype.onMoveView = function (translation, rotation)
       this._movement.add(trans.copy().multiply(distance));
       
       var vp = x3dom.SFMatrix4f.from_old(viewpoint.getViewMatrix());
-      this._transMat = vp.copy().invert().translate(this._movement).mult(vp).to_old();
+      this._transMat = vp.copy().invert().translate(this._movement).mult(vp);
     }
     
     if (rotation) {
@@ -966,19 +972,17 @@ x3dom.Viewarea.prototype.onDrag = function (x, y, buttonState)
             var foo = new x3dom.SFVec3f(0,0,0);
             
             var center = x3dom.SFVec3f.from_old(viewpoint.getCenterOfRotation());
-            var rotation = x3dom.SFMatrix4f.from_old(this._rotMat);
             
             var view = x3dom.SFMatrix4f.from_old(this.getViewMatrix());
             var view_center = view.copy().setTranslation(x3dom.SFVec3f.ZERO);
             
-            this._rotMat = rotation.copy().
+            this._rotMat = this._rotMat.copy().
                 translate(center).
                 mult(view_center.copy().invert()).
                 rotateX(-alpha).
                 rotateY(-beta).
                 mult(view_center).
-                translate(center.copy().negate()).
-                to_old();
+                translate(center.copy().negate());
         }
         if (buttonState & 4) //middle
         {
@@ -1004,7 +1008,7 @@ x3dom.Viewarea.prototype.onDrag = function (x, y, buttonState)
 
             //TODO; move real distance along viewing ray
             var vp = x3dom.SFMatrix4f.from_old(viewpoint.getViewMatrix());
-            this._transMat = vp.copy().invert().translate(this._movement).mult(vp).to_old();
+            this._transMat = vp.copy().invert().translate(this._movement).mult(vp);
         }
         if (buttonState & 2) //right
         {
@@ -1030,7 +1034,7 @@ x3dom.Viewarea.prototype.onDrag = function (x, y, buttonState)
             this._movement.add(vec);
             
             var vp = x3dom.SFMatrix4f.from_old(viewpoint.getViewMatrix());
-            this._transMat = vp.copy().invert().translate(this._movement).mult(vp).to_old();
+            this._transMat = vp.copy().invert().translate(this._movement).mult(vp);
         }
     }
 
