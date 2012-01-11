@@ -1038,6 +1038,10 @@ x3dom.SFMatrix4f.prototype =
   rotateY : function(angle) { math.mat4x4.rotateY(this._array, angle); return this; },
   rotateZ : function(angle) { math.mat4x4.rotateZ(this._array, angle); return this; },
   
+  lookAt : function(eye, at, up) { math.mat4x4.lookAt(eye._array, at._array, up._array, this._array); return this; },
+  
+  column3 : function(col) { var temp = new x3dom.SFVec3f(); math.mat4x4.column3(this._array, col, temp._array); return temp; },
+  
   transpose : function() { math.mat4x4.transpose(this._array); return this; },
   invert : function() { math.mat4x4.inverse(this._array); return this; }
 };
@@ -1301,6 +1305,10 @@ x3dom.SFVec3f.prototype =
   
   set : function(x, y, z) { this._array[0] = x; this._array[1] = y; this._array[2] = z; },
   
+  x : function() { return this._array[0]; },
+  y : function() { return this._array[1]; },
+  z : function() { return this._array[2]; },
+  
   negate : function() { math.vec3.negate(this._array); return this; },
   add : function(right) { math.vec3.add(this._array, right._array, this._array); return this; },
   subtract : function(right) { math.vec3.subtract(this._array, right._array, this._array); return this; },
@@ -1308,13 +1316,15 @@ x3dom.SFVec3f.prototype =
   cross : function(right) { math.vec3.cross(this._array, right._array, this._array); return this; },
 //  reflect = function (n)
   length : function() { return math.vec3.length(this._array); },
-  normalize : function() { math.vec3.normalize(this._array); },
+  normalize : function() { math.vec3.normalize(this._array); return this; },
 //  multComponents = function (that)
   multiply : function(factor) { math.vec3.scale(this._array, factor, this._array); return this; },
 //  divide = function (n)
 };
 
 x3dom.SFVec3f.ZERO = new x3dom.SFVec3f(0,0,0);
+x3dom.SFVec3f.MIN  = new x3dom.SFVec3f(Number.MIN_VALUE, Number.MIN_VALUE, Number.MIN_VALUE);
+x3dom.SFVec3f.MAX  = new x3dom.SFVec3f(Number.MAX_VALUE, Number.MAX_VALUE, Number.MAX_VALUE);
 
 ///////////////////////////////////////////////////////////////////////////////
 

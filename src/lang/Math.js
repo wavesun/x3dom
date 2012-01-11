@@ -423,10 +423,13 @@ math.mat4x4 =
   
   inverse : function(mat)
   {
-    /*
+    // DEBUG
     if(this.det(mat) == 0)
+    {
+      x3dom.debug.logInfo("Divide by 0");
       return;
-    */
+    }
+    // DEBUG
     
     // based on code of glMatrix.js (Brandon Jones 2011)
     var m00 = mat[00], m01 = mat[01], m02 = mat[02], m03 = mat[03],
@@ -666,42 +669,32 @@ math.mat4x4 =
     mat[12] = trans_x, mat[13] = trans_y, mat[14] = trans_z, mat[15] = 1;
   },
   
-  /** 1st base vector (right) */
-  e0 : function(mat, vec)
+  column3 : function(mat, col, vec)
   {
-    vec[0] = mat[00];
-    vec[1] = mat[04];
-    vec[2] = mat[08];
-    
-    vector.normalize(vec);
-  },
-
-  /** 2nd base vector (up) */
-  e1 : function(mat, vec)
-  {
-    vec[0] = mat[01];
-    vec[1] = mat[05];
-    vec[2] = mat[09];
-    
-    vector.normalize(vec);
-  },
-
-  /** 3rd base vector (fwd) */
-  e2 : function(mat, vec)
-  {
-    vec[0] = mat[02];
-    vec[1] = mat[06];
-    vec[2] = mat[10];
-    
-    vector.normalize(vec);
-  },
-
-  /** 4th base vector (pos) */
-  e3 : function(mat, vec)
-  {
-    vec[0] = mat[03];
-    vec[1] = mat[07];
-    vec[2] = mat[11];
+    if(col == 0)
+    {
+      vec[0] = mat[00];
+      vec[1] = mat[04];
+      vec[2] = mat[08];
+    }
+    else if(col == 1)
+    {
+      vec[0] = mat[01];
+      vec[1] = mat[05];
+      vec[2] = mat[09];
+    }
+    else if(col == 2)
+    {
+      vec[0] = mat[02];
+      vec[1] = mat[06];
+      vec[2] = mat[10];
+    }
+    else if(col == 3)
+    {
+      vec[0] = mat[03];
+      vec[1] = mat[07];
+      vec[2] = mat[11];
+    }
   }
 };
   

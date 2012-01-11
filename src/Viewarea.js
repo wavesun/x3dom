@@ -50,8 +50,8 @@ x3dom.Viewarea = function (document, scene) {
     this._lastTS = 0;
     this._mixer = new x3dom.MatrixMixer();
 
-	//Geometry cache for primitives (Sphere, Box, etc.)
-	this._geoCache = [];
+    //Geometry cache for primitives (Sphere, Box, etc.)
+    this._geoCache = [];
 };
 
 x3dom.Viewarea.prototype.tick = function(timeStamp)
@@ -94,9 +94,9 @@ x3dom.Viewarea.prototype.navigateTo = function(timeStamp)
     var navi = this._scene.getNavigationInfo();
     var needNavAnim = ( navi._vf.type[0].toLowerCase() === "game" ||
                         (this._lastButton > 0 &&
-                        (navi._vf.type[0].toLowerCase() === "fly" ||
-                         navi._vf.type[0].toLowerCase() === "walk" ||
-                         navi._vf.type[0].toLowerCase().substr(0, 5) === "looka")) );
+                          (navi._vf.type[0].toLowerCase() === "fly" ||
+                          navi._vf.type[0].toLowerCase() === "walk" ||
+                          navi._vf.type[0].toLowerCase().substr(0, 5) === "looka")) );
     
     this._deltaT = timeStamp - this._lastTS;
 
@@ -297,7 +297,8 @@ x3dom.Viewarea.prototype.moveFwd = function()
         var avatarRadius = 0.25;
         var avatarHeight = 1.6;
 
-        if (navi._vf.avatarSize.length > 2) {
+        if (navi._vf.avatarSize.length > 2)
+        {
             avatarRadius = navi._vf.avatarSize[0];
             avatarHeight = navi._vf.avatarSize[1];
         }
@@ -307,22 +308,24 @@ x3dom.Viewarea.prototype.moveFwd = function()
         var xRotRad = (this._pitch / 180 * Math.PI);
 
         var dist = 0;
-        var fMat = this._flyMat.inverse();
+        var fMat = x3dom.SFMatrix4f.from_old(this._flyMat).copy().invert();
 
         // check front for collisions
         this._scene._nameSpace.doc.ctx.pickValue(this, this._width/2, this._height/2);
 
         if (this._pickingInfo.pickObj)
         {
-            dist = this._pickingInfo.pickPos.subtract(fMat.e3()).length();
+            dist = x3dom.SFVec3f.from_old(this._pickingInfo.pickPos).copy().subtract(fMat.column3(3)).length();
 
-            if (dist <= 2 * avatarRadius) {
-                //x3dom.debug.logWarning("Collision at dist=" + dist.toFixed(4));
-            }
-            else {
+            if (dist > 2 * avatarRadius)
+            {
                 this._eyePos.x -= Math.sin(yRotRad) * speed;
                 this._eyePos.z += Math.cos(yRotRad) * speed;
                 this._eyePos.y += Math.sin(xRotRad) * speed;
+            }
+            else
+            {
+                //x3dom.debug.logWarning("Collision at dist=" + dist.toFixed(4));
             }
         }
     }
@@ -376,7 +379,8 @@ x3dom.Viewarea.prototype.animateTo = function(target, prev, dur)
 {
     var navi = this._scene.getNavigationInfo();
 
-    if (x3dom.isa(target, x3dom.nodeTypes.Viewpoint)) {
+    if (x3dom.isa(target, x3dom.nodeTypes.Viewpoint))
+    {
         target = target.getViewMatrix();
     }
 
@@ -420,20 +424,23 @@ x3dom.Viewarea.prototype.animateTo = function(target, prev, dur)
     this._needNavigationMatrixUpdate = true;
 };
 
-x3dom.Viewarea.prototype.getLights = function () {
+x3dom.Viewarea.prototype.getLights = function ()
+{
     return this._doc._nodeBag.lights;
 };
 
-x3dom.Viewarea.prototype.getLightsShadow = function () {
-	var lights = this._doc._nodeBag.lights;
-	for(var l=0; l<lights.length; l++) {
-		if(lights[l]._vf.shadowIntensity > 0.0){
-            return true;
-        }
-	}
+x3dom.Viewarea.prototype.getLightsShadow = function ()
+{
+  var lights = this._doc._nodeBag.lights;
+  for(var l=0; l<lights.length; l++)
+  {
+    if(lights[l]._vf.shadowIntensity > 0.0)
+      return true;
+  }
 };
 
-x3dom.Viewarea.prototype.getViewpointMatrix = function () {
+x3dom.Viewarea.prototype.getViewpointMatrix = function ()
+{
     var viewpoint = this._scene.getViewpoint();
     var mat_viewpoint = viewpoint.getCurrentTransform();
 
@@ -441,10 +448,9 @@ x3dom.Viewarea.prototype.getViewpointMatrix = function () {
     return viewpoint.getViewMatrix().mult(mat_viewpoint.inverse());
 };
 
-x3dom.Viewarea.prototype.getViewMatrix = function () {
-
+x3dom.Viewarea.prototype.getViewMatrix = function ()
+{
     var view = x3dom.SFMatrix4f.from_old(this.getViewpointMatrix());
-    
     return view.copy().mult(this._transMat).mult(this._rotMat).to_old();
 };
 
@@ -455,9 +461,9 @@ x3dom.Viewarea.prototype.getLightMatrix = function ()
 
     if (n > 0)
     {
-        var min = x3dom.fields.SFVec3f.MAX();
-        var max = x3dom.fields.SFVec3f.MIN();
-        var ok = this._scene.getVolume(min, max, true);    //TODO; FFF optimize
+        var min = x3dom.SFVec3f.MAX.copy();
+        var max = x3dom.SFVec3f.MIN.copy();
+        var ok = this._scene.getVolume(min.to_old(), max.to_old(), true);    //TODO; FFF optimize
 
         if (ok)
         {
@@ -474,15 +480,15 @@ x3dom.Viewarea.prototype.getLightMatrix = function ()
             for (i=0; i<n; i++)
             {
                 //FIXME; lights might be influenced by parent transformation
-                if (x3dom.isa(lights[i], x3dom.nodeTypes.PointLight)) {
-                    dia = dia.subtract(lights[i]._vf.location).normalize();
-                }
-                else {
-                    var dir = lights[i]._vf.direction.normalize().negate();
-                    dia = dia.add(dir.multiply(1.2*(dist1 > dist2 ? dist1 : dist2)));
+                if (x3dom.isa(lights[i], x3dom.nodeTypes.PointLight))
+                    dia.subtract(x3dom.SFVec3f.from_old(lights[i]._vf.location)).normalize();
+                else
+                {
+                    var dir = x3dom.SFVec3f.from_old(lights[i]._vf.direction).copy().normalize().negate();
+                    dia.add(dir.multiply(1.2*(dist1 > dist2 ? dist1 : dist2)));
                 }
 
-                l_arr[i] = lights[i].getViewMatrix(dia);
+                l_arr[i] = lights[i].getViewMatrix(dia.to_old());
             }
 
             return l_arr;
@@ -498,12 +504,10 @@ x3dom.Viewarea.prototype.getWCtoLCMatrix = function(lMat)
     var proj = this.getProjectionMatrix();
     var view;
 
-    if (arguments.length === 0) {
+    if (arguments.length === 0)
         view = this.getLightMatrix()[0];
-    }
-    else {
+    else
         view = lMat;
-    }
 
     return proj.mult(view);
 };
@@ -511,7 +515,6 @@ x3dom.Viewarea.prototype.getWCtoLCMatrix = function(lMat)
 x3dom.Viewarea.prototype.getProjectionMatrix = function()
 {
     var viewpoint = this._scene.getViewpoint();
-
     return viewpoint.getProjectionMatrix(this._width/this._height);
 };
 
