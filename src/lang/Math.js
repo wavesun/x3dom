@@ -26,7 +26,7 @@ else
 /** The Vector[2] */
 math.vec2 = 
 {
-  create : function()
+  create : function(arg)
   {
     var vec = new math.Float32Array(2);
     
@@ -201,7 +201,7 @@ math.vec3 =
 /** The Vector[4] */
 math.vec4 = 
 {
-  create : function()
+  create : function(arg)
   {
     var vec = new math.Float32Array(4);
     
