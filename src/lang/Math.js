@@ -296,7 +296,7 @@ math.mat4x4 =
   {
     var mat = new math.Float32Array(16);
     
-    if(arg.length)
+    if(arg)
     {
       if(arg[0] instanceof Array)
         for(var i=0; i<16; ++i)
